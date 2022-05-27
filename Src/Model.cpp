@@ -16,19 +16,20 @@ void Model::addShape(int SHAPEFLAG){
 	switch (SHAPEFLAG) {
 	case 0:
 		newShape = new Cube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
-		shapes.push_back(newShape);
 		break;
 	case 1:
 		newShape = new Triangle(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 1.0f);
-		shapes.push_back(newShape);
 		break;
 	case 2:
 		newShape = new Icosahedron(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
-		shapes.push_back(newShape);
+		break;
+	case 3:
+		newShape = new Plane(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), 20.0f, 20.0f);
 		break;
 	default:
 		break;
 	}
+	shapes.push_back(newShape);
 	notifySubscribers();
 }
 

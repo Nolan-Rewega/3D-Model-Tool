@@ -108,7 +108,7 @@ void View::drawShape(Shape* shape) {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glm::mat4 projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 10.0f);
+	glm::mat4 projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 30.0f);
 	glm::mat4 fullBoy = projectionMat4 * model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
 
 	GLint transformMat4Loc = glGetUniformLocation(shaderProgram, "transformMat4");

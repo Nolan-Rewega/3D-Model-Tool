@@ -15,6 +15,7 @@
 #include "Cube.h"
 #include "Triangle.h"
 #include "Icosahedron.h"
+#include "Plane.h"
 
 
 class Model {

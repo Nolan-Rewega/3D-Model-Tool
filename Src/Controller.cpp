@@ -52,7 +52,8 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 	case Controller::READY:
 		model->addShape(0);
 		model->addShape(2);
-		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 0.0f, -3.0f));
+		model->addShape(3);
+		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 1.0f, -3.0f));
 		model->translateShape(model->getShapes()[1], glm::vec3(1.0f, 1.0f, -3.0f));
 		currentState = HALT;
 		break;
