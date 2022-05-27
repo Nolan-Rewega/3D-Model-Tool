@@ -12,10 +12,21 @@ std::vector<Shape*> Model::getShapes(){
 }
 
 void Model::addShape(int SHAPEFLAG){
+	Shape* newShape = nullptr;
 	switch (SHAPEFLAG) {
 	case 0:
-		Shape* newShape = new Cube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+		newShape = new Cube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 		shapes.push_back(newShape);
+		break;
+	case 1:
+		newShape = new Triangle(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 1.0f);
+		shapes.push_back(newShape);
+		break;
+	case 2:
+		newShape = new Icosahedron(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
+		shapes.push_back(newShape);
+		break;
+	default:
 		break;
 	}
 	notifySubscribers();

@@ -1,10 +1,10 @@
 #include "Cube.h"
 
 
-Cube::Cube(glm::vec3 pos, glm::vec3 color, GLfloat width){
+Cube::Cube(glm::vec3 pos, glm::vec3 color, GLfloat givenWidth){
 	origin = pos;
 	shapeColor = color;
-	halfWidth = width/2;
+	width = givenWidth;
 
 	numberOfVertices = 8;
 	vertexDataByteSize = numberOfVertices * sizeof(GLfloat) * 6;
@@ -37,6 +37,7 @@ void Cube::rotateShape(glm::vec3 angleVec, GLfloat angle) {
 }
 
 void Cube::fillVertexData() {
+	GLfloat halfWidth = width / 2;
 	GLfloat x[2] = { origin.x - halfWidth, origin.x + halfWidth };
 	GLfloat y[2] = { origin.y - halfWidth, origin.y + halfWidth };
 	GLfloat z[2] = { origin.z - halfWidth, origin.z + halfWidth };
@@ -52,14 +53,15 @@ void Cube::fillVertexData() {
 	}
 
 	// -- update triangulation indicies
+	// -- all triangles are in front facing winding order (CCW).
 	GLuint test[36] = 
 	{ 
-		0,1,2,	1,2,3,	// -- left
-		2,3,7,	2,6,7,	// -- back
-		7,6,4,	7,5,4,	// -- right
-		4,0,1,	4,5,1,	// -- front
-		5,3,1,	5,3,7,	// -- top
-		4,0,2,	6,4,2	// -- bottom
+		2,1,0,	1,2,3,	// -- back
+		7,3,2,	2,6,7,	// -- top
+		7,6,4,	4,5,7,	// -- front
+		4,0,1,	1,5,4,	// -- bottom
+		1,3,5,	5,3,7,	// -- right
+		2,0,4,	2,4,6	// -- left
 	};
 
 	for (int i = 0; i < numberOfIndices; i++) {

@@ -20,6 +20,7 @@ View::View(){
 
 	gladLoadGL();
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glViewport(0, 0, 800, 800);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -53,7 +54,6 @@ View::~View(){
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-	//glDeleteBuffers(1, &matBO);
 	glDeleteProgram(shaderProgram);
 
 	glfwDestroyWindow(window);

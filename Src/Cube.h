@@ -11,8 +11,7 @@ public:
 	void rotateShape(glm::vec3 angleVec, GLfloat angle);
 
 private:
-	GLfloat halfWidth;
-
+	GLfloat width;
 	void fillVertexData();
 };
 

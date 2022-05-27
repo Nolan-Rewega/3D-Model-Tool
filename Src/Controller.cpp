@@ -19,16 +19,16 @@ void Controller::handleKeyPressed(GLFWwindow* window, int key, int scancode, int
 	case Controller::HALT:
 		switch (key){
 		case GLFW_KEY_W:
-			model->changeCameraEyePosition(1.0f, false);
+			model->changeCameraEyePosition(0.5f, false);
 			break;
 		case GLFW_KEY_A:
-			model->changeCameraEyePosition(-1.0f, true);
+			model->changeCameraEyePosition(-0.5f, true);
 			break;
 		case GLFW_KEY_S:
-			model->changeCameraEyePosition(-1.0f, false);
+			model->changeCameraEyePosition(-0.5f, false);
 			break;
 		case GLFW_KEY_D:
-			model->changeCameraEyePosition(1.0f, true);
+			model->changeCameraEyePosition(0.5f, true);
 			break;
 		default:
 			break;
@@ -51,9 +51,9 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 
 	case Controller::READY:
 		model->addShape(0);
-		model->addShape(0);
+		model->addShape(2);
 		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 0.0f, -3.0f));
-		model->translateShape(model->getShapes()[1], glm::vec3(-1.0f, -0.5f, -1.0f));
+		model->translateShape(model->getShapes()[1], glm::vec3(1.0f, 1.0f, -3.0f));
 		currentState = HALT;
 		break;
 
@@ -61,7 +61,7 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 		break;
 
 	case Controller::HALT:
-		model->translateShape(model->getShapes()[0], glm::vec3(xpos / 800.0f, xpos / 800.0f, -3.0f));
+		//model->translateShape(model->getShapes()[0], glm::vec3(xpos / 800.0f, xpos / 800.0f, -3.0f));
 		break;
 
 	default:
@@ -78,7 +78,7 @@ void Controller::handleMouseMove(GLFWwindow* window, double xpos, double ypos){
 		break;
 
 	case Controller::HALT:
-		model->rotateShape(model->getShapes()[0], glm::vec3(1.0f, 1.0f, 0.0f), angle);
+		//model->rotateShape(model->getShapes()[0], glm::vec3(1.0f, 1.0f, 0.0f), angle);
 		model->changeCameraViewDirection(glm::vec2(PrevX - xpos, PrevY - ypos));
 		break;
 

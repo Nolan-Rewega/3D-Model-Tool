@@ -10,8 +10,12 @@
 
 #include "Camera.h"
 #include "ModelSubscriber.h"
-#include "Cube.h"
+
 #include "Shape.h"
+#include "Cube.h"
+#include "Triangle.h"
+#include "Icosahedron.h"
+
 
 class Model {
 
