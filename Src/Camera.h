@@ -30,6 +30,7 @@ public:
 	void sphereTranslate(glm::vec3 delta);
 
 private:
+	int cycle;
 	void updateParameters();
 
 };
