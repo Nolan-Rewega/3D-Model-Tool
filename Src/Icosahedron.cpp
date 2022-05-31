@@ -9,9 +9,9 @@ Icosahedron::Icosahedron(glm::vec3 pos, glm::vec3 color, GLfloat givenWidth){
 	vertexDataByteSize = numberOfVertices * sizeof(GLfloat) * 6;
 	vertexData = (Vertex*)calloc(numberOfVertices, sizeof(Vertex));
 
-	numberOfIndices = 20 * 3;
-	indicesByteSize = numberOfIndices * sizeof(GLushort);
-	indices = (GLushort*)calloc(numberOfIndices, sizeof(GLushort));
+	numberOfDataIndices = 3 * 20;
+	dataIndicesByteSize = numberOfDataIndices * sizeof(GLushort);
+	dataIndices = (GLushort*)calloc(dataIndicesByteSize, sizeof(GLushort));
 
 	translationMatrix = glm::mat4(1.0f);
 	rotationMatrix = glm::mat4(1.0f);
@@ -23,35 +23,29 @@ Icosahedron::~Icosahedron(){
 	freeVertexData();
 }
 
-void Icosahedron::translateShape(glm::vec3 targetPos){
-	translationMatrix = glm::translate(glm::mat4(1.0f), targetPos);
-}
 
-void Icosahedron::rotateShape(glm::vec3 angleVec, GLfloat angle){
-	rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), angleVec);
-}
 
 void Icosahedron::fillVertexData() {
 	GLfloat halfWidth = width / 2;
 	GLfloat quarterWidth = halfWidth / 2;
 
 	// -- plane one
-	vertexData[0] = { glm::vec3(origin.x - quarterWidth, 0.0f, origin.z + halfWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[1] = { glm::vec3(origin.x + quarterWidth, 0.0f, origin.z + halfWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[2] = { glm::vec3(origin.x - quarterWidth, 0.0f, origin.z - halfWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[3] = { glm::vec3(origin.x + quarterWidth, 0.0f, origin.z - halfWidth), glm::vec3(0.0f,1.0f,0.0f) };
+	vertexData[0] = { glm::vec3(origin.x - quarterWidth, 0.0f, origin.z + halfWidth), shapeColor };
+	vertexData[1] = { glm::vec3(origin.x + quarterWidth, 0.0f, origin.z + halfWidth), shapeColor };
+	vertexData[2] = { glm::vec3(origin.x - quarterWidth, 0.0f, origin.z - halfWidth), shapeColor };
+	vertexData[3] = { glm::vec3(origin.x + quarterWidth, 0.0f, origin.z - halfWidth), shapeColor };
 
 	// -- plane two
-	vertexData[4] = { glm::vec3(origin.x + halfWidth, origin.y + quarterWidth, 0.0f), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[5] = { glm::vec3(origin.x + halfWidth, origin.y - quarterWidth, 0.0f), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[6] = { glm::vec3(origin.x - halfWidth, origin.y + quarterWidth, 0.0f), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[7] = { glm::vec3(origin.x - halfWidth, origin.y - quarterWidth, 0.0f), glm::vec3(0.0f,1.0f,0.0f) };
+	vertexData[4] = { glm::vec3(origin.x + halfWidth, origin.y + quarterWidth, 0.0f), shapeColor };
+	vertexData[5] = { glm::vec3(origin.x + halfWidth, origin.y - quarterWidth, 0.0f), shapeColor };
+	vertexData[6] = { glm::vec3(origin.x - halfWidth, origin.y + quarterWidth, 0.0f), shapeColor };
+	vertexData[7] = { glm::vec3(origin.x - halfWidth, origin.y - quarterWidth, 0.0f), shapeColor };
 
 	// -- plane three
-	vertexData[8]  = { glm::vec3(0.0f, origin.y + halfWidth, origin.z + quarterWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[9]  = { glm::vec3(0.0f, origin.y + halfWidth, origin.z - quarterWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[10] = { glm::vec3(0.0f, origin.y - halfWidth, origin.z + quarterWidth), glm::vec3(0.0f,1.0f,0.0f) };
-	vertexData[11] = { glm::vec3(0.0f, origin.y - halfWidth, origin.z - quarterWidth), glm::vec3(0.0f,1.0f,0.0f) };
+	vertexData[8]  = { glm::vec3(0.0f, origin.y + halfWidth, origin.z + quarterWidth), shapeColor };
+	vertexData[9]  = { glm::vec3(0.0f, origin.y + halfWidth, origin.z - quarterWidth), shapeColor };
+	vertexData[10] = { glm::vec3(0.0f, origin.y - halfWidth, origin.z + quarterWidth), shapeColor };
+	vertexData[11] = { glm::vec3(0.0f, origin.y - halfWidth, origin.z - quarterWidth), shapeColor };
 	
 	
 	GLuint test[60] =
@@ -63,7 +57,7 @@ void Icosahedron::fillVertexData() {
 		7, 11, 10,		0,  7, 10,		6,  2,  7,		6,  7,  0,
 	};
 
-	for (int i = 0; i < numberOfIndices; i++) {
-		indices[i] = test[i];
+	for (int i = 0; i < numberOfDataIndices; i++) {
+		dataIndices[i] = test[i];
 	}
 }

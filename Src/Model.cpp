@@ -1,7 +1,7 @@
 #include "Model.h"
 
 Model::Model(){
-	camera = new Camera(0.01f);
+	camera = new Camera(0.01f, 3.0f);
 }
 Model::~Model() {
 	delete camera;
@@ -52,20 +52,21 @@ void Model::rotateShape(Shape* givenShape, glm::vec3 rotation, GLfloat angle){
 
 
 
-void Model::changeCameraViewDirection(glm::vec2 delta){
-	camera->updateViewDirection(glm::vec3(delta, 0.0f));
+void Model::zoomCamera(GLfloat dZoom){
+	camera->zoom(dZoom);
 	notifySubscribers();
 }
 
-void Model::changeCameraUpVector(glm::vec3 newUpVector) {
-	camera->updateUpVector(newUpVector);
+void Model::rotateCamera(GLfloat dTheta, GLfloat dPhi){
+	camera->sphereRotation(dTheta, dPhi);
 	notifySubscribers();
 }
 
-void Model::changeCameraEyePosition(GLfloat leftOrBack, bool isStrafing){
-	camera->updateEyePosition(leftOrBack, isStrafing);
+void Model::translateCamera(glm::vec3 delta) {
+	camera->sphereTranslate(delta);
 	notifySubscribers();
 }
+
 
 glm::mat4 Model::getWorldtoViewMatrix(){
 	return camera->getWorldToViewMatrix();

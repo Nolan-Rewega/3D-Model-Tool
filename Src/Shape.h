@@ -14,13 +14,17 @@
 
 class Shape {
 public:
-	virtual void translateShape(glm::vec3 targetPos) = 0;
-	virtual void rotateShape(glm::vec3 angleVec, GLfloat angle) = 0;
+	void translateShape(glm::vec3 targetPos);
+	void rotateShape(glm::vec3 angleVec, GLfloat angle);
 	
 	Vertex* getVertexData();
 	GLuint getVertexDataSizeInBytes();
-	GLushort* getIndices();
-	GLuint getIndicesSizeInBytes();
+
+	GLushort* getDataIndices();
+	GLuint getDataIndicesSizeInBytes();
+
+	GLushort* getOutlineIndices();
+	GLuint getOutlineIndicesSizeInBytes();
 	
 	glm::mat4 getRotationMatrix();
 	glm::mat4 getTranslationMatrix();
@@ -30,15 +34,18 @@ protected:
 	GLuint numberOfVertices;
 	GLuint vertexDataByteSize;
 
-	GLushort* indices;
-	GLuint numberOfIndices;
-	GLuint indicesByteSize;
+	GLushort* dataIndices;
+	GLuint numberOfDataIndices;
+	GLuint dataIndicesByteSize;
+
+	GLushort* outlineIndices;
+	GLuint numberOfOutlineIndices;
+	GLuint outlineIndiceByteSize;
 
 	glm::vec3 origin;
 	glm::vec3 shapeColor;
 	glm::mat4 translationMatrix;
 	glm::mat4 rotationMatrix;
-
 
 	void freeVertexData();
 

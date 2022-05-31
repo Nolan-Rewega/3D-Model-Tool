@@ -10,9 +10,9 @@ Plane::Plane(glm::vec3 pos, glm::vec3 color, GLfloat givenWidth, GLfloat givenHe
 	vertexDataByteSize = numberOfVertices * sizeof(GLfloat) * 6;
 	vertexData = (Vertex*)calloc(numberOfVertices, sizeof(Vertex));
 
-	numberOfIndices = 6;
-	indicesByteSize = numberOfIndices * sizeof(GLushort);
-	indices = (GLushort*)calloc(numberOfIndices, sizeof(GLushort));
+	numberOfDataIndices = 6;
+	dataIndicesByteSize = numberOfDataIndices * sizeof(GLushort);
+	dataIndices = (GLushort*)calloc(numberOfDataIndices, sizeof(GLushort));
 
 	translationMatrix = glm::mat4(1.0f);
 	rotationMatrix = glm::mat4(1.0f);
@@ -34,6 +34,6 @@ void Plane::fillVertexData(){
 	vertexData[2] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z - halfHeight), shapeColor };
 	vertexData[3] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z + halfHeight), shapeColor };
 
-	indices[0] = 0; indices[1] = 2; indices[2] = 1;
-	indices[3] = 3; indices[4] = 1; indices[5] = 2;
+	dataIndices[0] = 0; dataIndices[1] = 2; dataIndices[2] = 1;
+	dataIndices[3] = 3; dataIndices[4] = 1; dataIndices[5] = 2;
 }

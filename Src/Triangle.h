@@ -9,8 +9,7 @@ public:
 	Triangle(glm::vec3 pos, glm::vec3 color, GLfloat width, GLfloat height);
 	~Triangle();
 
-	void translateShape(glm::vec3 targetPos);
-	void rotateShape(glm::vec3 angleVec, GLfloat angle);
+
 private:
 	GLfloat halfWidth, halfHeight;
 

@@ -23,7 +23,7 @@ View::View(){
 	glEnable(GL_CULL_FACE);
 	glViewport(0, 0, 800, 800);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 //if (glfwRawMouseMotionSupported())
 //	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
@@ -90,7 +90,7 @@ void View::drawShape(Shape* shape) {
 	glBufferData(GL_ARRAY_BUFFER, shape->getVertexDataSizeInBytes(), shape->getVertexData(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->getIndicesSizeInBytes(), shape->getIndices(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->getDataIndicesSizeInBytes(), shape->getDataIndices(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)0);
 	glEnableVertexAttribArray(0);
@@ -111,14 +111,28 @@ void View::drawShape(Shape* shape) {
 	glm::mat4 projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 30.0f);
 	glm::mat4 fullBoy = projectionMat4 * model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
 
+	glm::vec3 ambientLight = glm::vec3(0.3f, 0.3f, 0.3f);
+
+	//GLint flagLocation = glGetUniformLocation(shaderProgram, "flag");
+
 	GLint transformMat4Loc = glGetUniformLocation(shaderProgram, "transformMat4");
+	GLint ambientVec3Loc = glGetUniformLocation(shaderProgram, "ambientVec3");
 	glUniformMatrix4fv(transformMat4Loc, 1, GL_FALSE, &fullBoy[0][0]);
+	glUniform3fv(ambientVec3Loc, 1, &ambientLight[0]);
+
 
 	glUseProgram(shaderProgram);
 	glBindVertexArray(VAO);
+	//glUniform1f(flagLocation, 0.0f);
+	glDrawElements(GL_TRIANGLES, shape->getDataIndicesSizeInBytes() / sizeof(shape->getDataIndices()[0]), GL_UNSIGNED_SHORT, 0);
 
-	glDrawElements(GL_TRIANGLES, shape->getIndicesSizeInBytes() / sizeof(shape->getIndices()[0]), GL_UNSIGNED_SHORT, 0);
+	//glGenBuffers(1, &EBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape->getOutlineIndicesSizeInBytes(), shape->getOutlineIndices(), GL_STATIC_DRAW);
 
+	//glUniform1f(flagLocation, 1.0f);
+	//glLineWidth(3.0f);
+	//glDrawElements(GL_LINES, shape->getOutlineIndicesSizeInBytes() / sizeof(shape->getOutlineIndices()[0]), GL_UNSIGNED_SHORT, 0);
 
 }
 
@@ -184,6 +198,10 @@ void View::setController(Controller* givenController){
 		static_cast<Controller*>(glfwGetWindowUserPointer(window))->handleKeyPressed(window, key, scancode, action, mods);
 	};
 
+	auto mouseScroll = [](GLFWwindow* window, double xoffset, double yoffset) {
+		static_cast<Controller*>(glfwGetWindowUserPointer(window))->handleMouseScroll(window, xoffset, yoffset);
+	};
+
 	auto mouseMovement = [](GLFWwindow* window, double xpos, double ypos) {
 		static_cast<Controller*>(glfwGetWindowUserPointer(window))->handleMouseMove(window, xpos, ypos);
 	};
@@ -191,8 +209,8 @@ void View::setController(Controller* givenController){
 
 	glfwSetMouseButtonCallback(window, mouseClick);
 	glfwSetKeyCallback(window, keyPress);
+	glfwSetScrollCallback(window, mouseScroll);
 	glfwSetCursorPosCallback(window, mouseMovement);
-
 }
 
 GLFWwindow* View::getWindow(){

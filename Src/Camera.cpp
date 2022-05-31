@@ -1,6 +1,13 @@
 #include "Camera.h"
 
-Camera::Camera(GLfloat sensitivity){
+Camera::Camera(GLfloat sensitivity, GLfloat givenRadius){
+	radius = givenRadius;
+	theta = glm::radians(0.0f);
+	phi = glm::radians(3.1415f / 2.0f);
+
+	offset = glm::vec3(0.0, 0.0, -3.0f);
+
+
 	eyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	viewDirection = glm::vec3(0.0f, 0.0f, -1.0f);
 	upVector = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -13,24 +20,33 @@ glm::mat4 Camera::getWorldToViewMatrix(){
 	return glm::lookAt(eyePosition, eyePosition + viewDirection, upVector);
 }
 
+void Camera::sphereRotation(GLfloat dTheta, GLfloat dPhi) {
+	theta -= dTheta * SENSE;
+	phi += dPhi * SENSE;
 
-void Camera::updateEyePosition(GLfloat leftOrBack, bool isStrafing){
-	// -- leftOrBack is either -1.0f or 1.0f boof code
-	glm::vec3 strafeDirection = glm::cross(viewDirection, upVector);
-	eyePosition += (isStrafing) ? (cameraSpeed * strafeDirection * leftOrBack) : (cameraSpeed * viewDirection * leftOrBack);
+	updateParameters();
 }
 
-void Camera::updateViewDirection(glm::vec3 delta){
-	// -- view direction based on mouse
-	if (glm::length(delta) < 80.0f) {
-		viewDirection = glm::mat3(glm::rotate(delta.x * SENSE, upVector)) * viewDirection;
-		viewDirection = glm::mat3(glm::rotate(delta.y * SENSE, glm::cross(viewDirection, upVector))) * viewDirection;
-	}
-	else { std::cout << "skiped" << std::endl; }
+void Camera::zoom(GLfloat dZoom){
+	radius -= dZoom;
+	updateParameters();
 }
 
-void Camera::updateUpVector(glm::vec3 delta){
-	upVector += delta;
+void Camera::sphereTranslate(glm::vec3 delta){
+	offset += delta;
+	updateParameters();
 }
+
+void Camera::updateParameters(){
+	eyePosition = glm::vec3(
+		radius * glm::sin(phi) * glm::cos(theta),
+		radius * glm::sin(phi) * glm::sin(theta),
+		radius * glm::cos(phi)
+	) + offset;
+
+	viewDirection = -eyePosition + offset; // -- normal to sphere surface
+	upVector = (-eyePosition / radius) + offset;
+}
+
 
 

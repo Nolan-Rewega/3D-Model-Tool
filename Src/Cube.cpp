@@ -10,10 +10,41 @@ Cube::Cube(glm::vec3 pos, glm::vec3 color, GLfloat givenWidth){
 	vertexDataByteSize = numberOfVertices * sizeof(GLfloat) * 6;
 	vertexData = (Vertex*)calloc(numberOfVertices, sizeof(Vertex));
 	
-	numberOfIndices = 3 * 2 * 6;
-	indicesByteSize = numberOfIndices * sizeof(GLushort);
-	indices = (GLushort*)calloc(numberOfIndices, sizeof(GLushort));
+	numberOfDataIndices = 3 * 2 * 6;
+	dataIndicesByteSize = numberOfDataIndices * sizeof(GLushort);
+	dataIndices = (GLushort*)calloc(dataIndicesByteSize, sizeof(GLushort));
 	
+	// -- all triangles are in front facing winding order (CCW).
+	GLushort temp[36] =
+	{
+		2,1,0,	1,2,3,	// -- back
+		7,3,2,	2,6,7,	// -- top
+		7,6,4,	4,5,7,	// -- front
+		4,0,1,	1,5,4,	// -- bottom
+		1,3,5,	5,3,7,	// -- right
+		2,0,4,	2,4,6	// -- left
+	};
+
+	for (unsigned int i = 0; i < numberOfDataIndices; i++) {
+		dataIndices[i] = temp[i];
+	}
+
+	numberOfOutlineIndices = 4*3*2;
+	outlineIndiceByteSize = numberOfOutlineIndices * sizeof(GLushort);
+	outlineIndices = (GLushort*)calloc(outlineIndiceByteSize, sizeof(GLushort));
+
+	// -- outline
+	GLushort tempOutline [24] =
+	{
+		0,1, 0,4, 0,2, 1,3, 1,5, 2,3,
+		2,6, 3,7, 4,5, 4,6, 5,7, 6,7
+	};
+
+	for (unsigned int i = 0; i < numberOfDataIndices; i++) {
+		outlineIndices[i] = tempOutline[i];
+	}
+
+
 	translationMatrix = glm::mat4(1.0f);
 	rotationMatrix = glm::mat4(1.0f);
 
@@ -24,17 +55,6 @@ Cube::~Cube() {
 }
 
 
-
-
-void Cube::translateShape(glm::vec3 targetPos){
-	translationMatrix = glm::translate(glm::mat4(1.0f), targetPos);
-	// fillVertexData();
-}
-
-void Cube::rotateShape(glm::vec3 angleVec, GLfloat angle) {
-	// -- remember, move the shape to the origin then rotate.
-	rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(angle), angleVec);
-}
 
 void Cube::fillVertexData() {
 	GLfloat halfWidth = width / 2;
@@ -51,23 +71,6 @@ void Cube::fillVertexData() {
 			}
 		}
 	}
-
-	// -- update triangulation indicies
-	// -- all triangles are in front facing winding order (CCW).
-	GLuint test[36] = 
-	{ 
-		2,1,0,	1,2,3,	// -- back
-		7,3,2,	2,6,7,	// -- top
-		7,6,4,	4,5,7,	// -- front
-		4,0,1,	1,5,4,	// -- bottom
-		1,3,5,	5,3,7,	// -- right
-		2,0,4,	2,4,6	// -- left
-	};
-
-	for (int i = 0; i < numberOfIndices; i++) {
-		indices[i] = test[i];
-	}
-
 }
 
 

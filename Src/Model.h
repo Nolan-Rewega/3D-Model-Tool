@@ -34,9 +34,10 @@ public:
 
 
 	// -- Camera object methods.
-	void changeCameraViewDirection(glm::vec2 delta);
-	void changeCameraUpVector(glm::vec3 newUpVector);
-	void changeCameraEyePosition(GLfloat leftOrBack, bool isStrafing);
+	void zoomCamera(GLfloat dZoom);
+	void rotateCamera(GLfloat dTheta, GLfloat dPhi);
+	void translateCamera(glm::vec3 delta);
+
 	glm::mat4 getWorldtoViewMatrix();
 
 	// -- Pub-Sub methods.
