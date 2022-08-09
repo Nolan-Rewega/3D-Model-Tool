@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include "Model.h"
 #include "Controller.h"
 #include "ModelSubscriber.h"
@@ -23,15 +22,17 @@ public:
 
 private:
 	GLuint VAO, VBO, EBO;
-	GLuint vertexShader, fragmentShader, shaderProgram;
+	GLuint shaderProgram;
 	GLFWwindow* window;
 
 	Model* model;
 	void draw();
 	void drawShape(Shape* shape);
+	void drawNormals(Shape* shape);
 
 	void checkGLSLErrors(GLuint objectID, GLint ERRORCODE);
 	string readShaderCode(const char* filename);
+	void deleteBuffers();
 };
 
 #endif // !VIEW_H

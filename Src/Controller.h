@@ -26,7 +26,6 @@ private:
 
 	double PrevX, PrevY;
 
-	GLfloat angle;
 	Model* model;
 
 };

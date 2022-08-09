@@ -13,9 +13,9 @@
 
 #include "Shape.h"
 #include "Cube.h"
-#include "Triangle.h"
 #include "Icosahedron.h"
 #include "Plane.h"
+#include "Tetrahedron.h"
 
 
 class Model {
@@ -38,6 +38,7 @@ public:
 	void rotateCamera(GLfloat dTheta, GLfloat dPhi);
 	void translateCamera(glm::vec3 delta);
 
+	glm::vec3 getEyePosition();
 	glm::mat4 getWorldtoViewMatrix();
 
 	// -- Pub-Sub methods.

@@ -1,11 +1,12 @@
 #include "Camera.h"
 
-Camera::Camera(GLfloat sensitivity, GLfloat givenRadius){
-	radius = givenRadius;
+Camera::Camera(GLfloat sensitivity, GLfloat sphereRadius){
+	radius = sphereRadius;
 	theta = glm::radians(90.0f);
 	phi = glm::radians(90.0f);
 
-	offset = glm::vec3(0.0, 0.0, -3.0f);
+	// -- origin of the camera sphere
+	origin = glm::vec3(0.0, 0.0, -3.0f);
 
 
 	eyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -15,6 +16,10 @@ Camera::Camera(GLfloat sensitivity, GLfloat givenRadius){
 	SENSE = sensitivity;
 	cameraSpeed = 0.5f;
 	cycle = 0;
+}
+
+glm::vec3 Camera::getEyePosition(){
+	return eyePosition;
 }
 
 glm::mat4 Camera::getWorldToViewMatrix(){
@@ -51,22 +56,19 @@ void Camera::zoom(GLfloat dZoom){
 }
 
 void Camera::sphereTranslate(glm::vec3 delta){
-	offset += delta;
+	origin += delta;
 	updateParameters();
 }
 
 void Camera::updateParameters(){
-	GLfloat y = radius * glm::cos(phi);
-
 	eyePosition = glm::vec3(
 		radius * glm::sin(phi) * glm::cos(theta),
 		radius * glm::cos(phi),
 		radius * glm::sin(phi) * glm::sin(theta)
-	) + offset;
+	) + origin;
 
 	// -- view direction is the normal vector of sphere surface
-	viewDirection = -eyePosition + offset;
-
+	viewDirection = -eyePosition + origin;
 }
 
 

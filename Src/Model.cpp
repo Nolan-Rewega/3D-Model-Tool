@@ -18,13 +18,13 @@ void Model::addShape(int SHAPEFLAG){
 		newShape = new Cube(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 		break;
 	case 1:
-		newShape = new Triangle(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 1.0f);
-		break;
-	case 2:
 		newShape = new Icosahedron(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), 1.0f);
 		break;
-	case 3:
+	case 2:
 		newShape = new Plane(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), 20.0f, 20.0f);
+		break;
+	case 3:
+		newShape = new Tetrahedron(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.3f, 0.3f, 0.3f), 1.0f);
 		break;
 	default:
 		break;
@@ -34,7 +34,6 @@ void Model::addShape(int SHAPEFLAG){
 }
 
 void Model::removeShape(Shape* givenShape){
-	
 	notifySubscribers();
 }
 
@@ -67,6 +66,10 @@ void Model::translateCamera(glm::vec3 delta) {
 	notifySubscribers();
 }
 
+
+glm::vec3 Model::getEyePosition(){
+	return camera->getEyePosition();
+}
 
 glm::mat4 Model::getWorldtoViewMatrix(){
 	return camera->getWorldToViewMatrix();

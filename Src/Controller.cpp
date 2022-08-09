@@ -2,18 +2,15 @@
 
 Controller::Controller(){
 	currentState = INIT;
-	angle = 0.0f;
 }
 
 
 
 void Controller::handleKeyPressed(GLFWwindow* window, int key, int scancode, int action, int mods){
-	angle += 0.001f;
-
 	switch (currentState){
 
 	case Controller::READY:
-		if (action == GLFW_PRESS && GLFW_MOD_CONTROL) {
+		if (action == GLFW_PRESS && mods == GLFW_MOD_CONTROL) {
 			switch (key) {
 			case GLFW_KEY_W:
 				model->translateCamera(glm::vec3(0.0f, 0.0f, 0.5f));
@@ -48,18 +45,17 @@ void Controller::handleKeyPressed(GLFWwindow* window, int key, int scancode, int
 
 
 void Controller::handleMouseClick(GLFWwindow* window, int button, int action, int mods){
-	std::cout << "CLICKED SETUP \n";
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-
+	//std::cout << "CLICKED SETUP \n";
 	switch (currentState) {
 
 	case Controller::INIT:
 		model->addShape(0);
-		model->addShape(0);
-		//model->addShape(3);
-		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 0.0f, -3.0f));
-		model->translateShape(model->getShapes()[1], glm::vec3(0.0f, 1.0f, -2.0f));
+		model->addShape(1);
+		//model->addShape(2);
+		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 0.0f, -1.0f));
+		//model->rotateShape(model->getShapes()[0], glm::vec3(1.0f, 0.0f, 0.0f), 45);
+		model->translateShape(model->getShapes()[1], glm::vec3(0.0f, 0.0f, -5.0f));
+		//model->translateShape(model->getShapes()[2], glm::vec3(0.0f, -1.0f, -2.0f));
 
 		currentState = READY;
 		break;
@@ -76,6 +72,8 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 		break;
 
 	case Controller::HALT:
+		//double xpos, ypos;
+		//glfwGetCursorPos(window, &xpos, &ypos);
 		//model->translateShape(model->getShapes()[0], glm::vec3(xpos / 800.0f, xpos / 800.0f, -3.0f));
 		break;
 
@@ -85,7 +83,7 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 }
 
 void Controller::handleMouseScroll(GLFWwindow* window, double xoffset, double yoffset) {
-	std::cout << "WE SCHOOLING" << xoffset << "      " << yoffset << std::endl;
+	//std::cout << "WE SCROLLING" << xoffset << "      " << yoffset << std::endl;
 	switch (currentState)
 	{
 	case Controller::INIT:

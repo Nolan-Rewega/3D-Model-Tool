@@ -4,6 +4,7 @@
 #include "Controller.h"
 #include "ModelSubscriber.h"
 
+
 int main() {
 	Controller* controller = new Controller();
 	Model* model = new Model();

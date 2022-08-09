@@ -1,5 +1,6 @@
 #ifndef SHAPE_H
 #define SHAPE_H
+
 #include <iostream>
 #include <vector>
 
@@ -17,38 +18,51 @@ public:
 	void translateShape(glm::vec3 targetPos);
 	void rotateShape(glm::vec3 angleVec, GLfloat angle);
 	
-	Vertex* getVertexData();
-	GLuint getVertexDataSizeInBytes();
+	GLfloat* getShapeBuffer();
+	GLuint getShapeBufferSizeInBytes();
+	GLuint getNumberOfBufferVertices();
 
-	GLushort* getDataIndices();
-	GLuint getDataIndicesSizeInBytes();
-
-	GLushort* getOutlineIndices();
-	GLuint getOutlineIndicesSizeInBytes();
-	
 	glm::mat4 getRotationMatrix();
 	glm::mat4 getTranslationMatrix();
 
+
+	GLfloat* debugConvertToLineNormals();
+
 protected:
+	// -- Position      (x,y,z)
+	// -- Color         (r,g,b)
 	Vertex* vertexData;
-	GLuint numberOfVertices;
 	GLuint vertexDataByteSize;
+	GLuint numberOfVertices;
 
-	GLushort* dataIndices;
-	GLuint numberOfDataIndices;
-	GLuint dataIndicesByteSize;
+	// -- Normals       (u,v,w)
+	glm::vec3* normals;
+	GLuint normalsByteSize;
 
-	GLushort* outlineIndices;
-	GLuint numberOfOutlineIndices;
-	GLuint outlineIndiceByteSize;
+	// -- Faces, represented by vertexData indices.
+	GLushort* faces;
+	GLuint facesByteSize;
+	GLuint numberOfFaces;
 
+	// -- openGL buffer
+	GLfloat* buffer;
+	GLuint bufferByteSize;
+
+	// -- Common shape parameters.
 	glm::vec3 origin;
-	glm::vec3 shapeColor;
+	glm::vec3 color;
 	glm::mat4 translationMatrix;
 	glm::mat4 rotationMatrix;
 
-	void freeVertexData();
+	virtual void fillVertexData() = 0;
+	virtual void fillFaces() = 0;
 
+	void initialization();
+
+	void convertToBuffer();
+	void calculateSurfaceNormals();
+
+	void freeArrays();
 };
 
 

@@ -1,39 +1,43 @@
 #include "Plane.h"
 
-Plane::Plane(glm::vec3 pos, glm::vec3 color, GLfloat givenWidth, GLfloat givenHeight){
-	origin = pos;
-	shapeColor = color;
-	width = givenWidth;
-	height = givenHeight;
+Plane::Plane(glm::vec3 _position, glm::vec3 _color, GLfloat _width, GLfloat _height) {
+	origin = _position;
+	color  = _color;
+	width  = _width;
+	height = _height;
 
+	// -- Set Geometry values.
 	numberOfVertices = 4;
-	vertexDataByteSize = numberOfVertices * sizeof(GLfloat) * 6;
-	vertexData = (Vertex*)calloc(numberOfVertices, sizeof(Vertex));
+	numberOfFaces = 2;
+	initialization();
 
-	numberOfDataIndices = 6;
-	dataIndicesByteSize = numberOfDataIndices * sizeof(GLushort);
-	dataIndices = (GLushort*)calloc(numberOfDataIndices, sizeof(GLushort));
-
+	// -- Initial Matrice definitions.
 	translationMatrix = glm::mat4(1.0f);
 	rotationMatrix = glm::mat4(1.0f);
 
 	fillVertexData();
+	fillFaces();
+	calculateSurfaceNormals();
+	convertToBuffer();
 }
 
 Plane::~Plane(){
-	freeVertexData();
+	freeArrays();
 }
-
+void Plane::fillFaces() {
+	faces[0] = 0; faces[1] = 2; faces[2] = 1;
+	faces[3] = 3; faces[4] = 1; faces[5] = 2;
+}
 
 
 void Plane::fillVertexData(){
 	GLfloat halfWidth = width / 2;
 	GLfloat halfHeight= height / 2;
-	vertexData[0] = { glm::vec3(origin.x + halfWidth, 0.0f, origin.z - halfHeight), shapeColor };
-	vertexData[1] = { glm::vec3(origin.x + halfWidth, 0.0f, origin.z + halfHeight), shapeColor };
-	vertexData[2] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z - halfHeight), shapeColor };
-	vertexData[3] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z + halfHeight), shapeColor };
+	vertexData[0] = { glm::vec3(origin.x + halfWidth, 0.0f, origin.z - halfHeight), color };
+	vertexData[1] = { glm::vec3(origin.x + halfWidth, 0.0f, origin.z + halfHeight), color };
+	vertexData[2] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z - halfHeight), color };
+	vertexData[3] = { glm::vec3(origin.x - halfWidth, 0.0f, origin.z + halfHeight), color };
 
-	dataIndices[0] = 0; dataIndices[1] = 2; dataIndices[2] = 1;
-	dataIndices[3] = 3; dataIndices[4] = 1; dataIndices[5] = 2;
+	faces[0] = 0; faces[1] = 2; faces[2] = 1;
+	faces[3] = 3; faces[4] = 1; faces[5] = 2;
 }

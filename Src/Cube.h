@@ -4,12 +4,14 @@
 
 class Cube : public Shape{
 public:
-	Cube(glm::vec3 pos, glm::vec3 color, GLfloat width);
+	Cube(glm::vec3 _position, glm::vec3 _color, GLfloat _width);
 	~Cube();
 
 private:
 	GLfloat width;
+
 	void fillVertexData();
+	void fillFaces();
 };
 
 

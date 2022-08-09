@@ -10,19 +10,8 @@
 class Camera {
 public:
 
-	GLfloat SENSE, cameraSpeed;
-
-	GLfloat radius, theta, phi;
-
-	glm::vec3 eyePosition;
-	glm::vec3 viewDirection; // -- must be normalized
-	glm::vec3 upVector;
-	glm::vec3 offset;
-
-	//glm::vec2 oldCursorPosition, delta;
-
-
 	Camera(GLfloat sensitivity, GLfloat givenRadius);
+	glm::vec3 getEyePosition();
 	glm::mat4 getWorldToViewMatrix();
 
 	void sphereRotation(GLfloat dTheta, GLfloat dPhi);
@@ -31,8 +20,17 @@ public:
 
 private:
 	int cycle;
-	void updateParameters();
 
+	GLfloat SENSE, cameraSpeed;
+
+	GLfloat radius, theta, phi;
+
+	glm::vec3 eyePosition;
+	glm::vec3 viewDirection; // -- must be normalized
+	glm::vec3 upVector;
+	glm::vec3 origin;
+
+	void updateParameters();
 };
 
 
