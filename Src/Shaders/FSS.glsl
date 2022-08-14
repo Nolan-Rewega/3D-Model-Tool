@@ -75,9 +75,9 @@ float calculateDiffuseLight(vec3 lightDirection){
 }
 
 float calculateSpecularLight(vec3 lightDirection, int exponent){
-	vec3 reflection = reflect( -lightDirection, normal );
-	vec3 eyeVec3 = normalize( cameraPosition - position ); 
-	return pow(  clamp( dot( reflection, eyeVec3 ), 0, 1 ), exponent );
+	vec3 eyeVec3 = normalize( cameraPosition - position );
+	vec3 halfway = normalize(lightDirection + eyeVec3);
+	return pow(  max( dot( normal, halfway ), 0 ), exponent );
 	//return 0.0;
 }
 
@@ -107,7 +107,7 @@ vec3 pointLight(Light light){
 	vec3 diffuse    = light.diffuse * calculateDiffuseLight(lightVec3);
 
 	// -- Specular lighting.
-	vec3 specular   = light.specular * calculateSpecularLight(lightVec3, 33);
+	vec3 specular   = light.specular * calculateSpecularLight(lightVec3, 127);
 	
 	// -- Light attenuation
 	float distance     = length(light.position - position);
