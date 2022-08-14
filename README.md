@@ -1,3 +1,3 @@
-# 3D-Model-Tool
+# 3D-Modelling-Tool
+A 3D modelling program in which the user can create geometric shapes, assign them material properties, and render them to a scene.
 
-A 3D modeling program that allows the user to create geometry in a scene assign the geometry matieral properies and render the current camera view.
