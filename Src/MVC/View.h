@@ -24,6 +24,7 @@ private:
 	GLuint VAO, VBO, EBO;
 	GLuint shaderProgram;
 	GLFWwindow* window;
+	glm::mat4 projectionMat4;
 
 	Model* model;
 	void draw();

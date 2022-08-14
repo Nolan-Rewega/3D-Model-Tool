@@ -12,6 +12,7 @@ public:
 
 	Camera(GLfloat sensitivity, GLfloat givenRadius);
 	glm::vec3 getEyePosition();
+	glm::vec3 getViewDirection();
 	glm::mat4 getWorldToViewMatrix();
 
 	void sphereRotation(GLfloat dTheta, GLfloat dPhi);

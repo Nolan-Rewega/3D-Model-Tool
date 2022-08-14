@@ -22,6 +22,10 @@ glm::vec3 Camera::getEyePosition(){
 	return eyePosition;
 }
 
+glm::vec3 Camera::getViewDirection(){
+	return viewDirection;
+}
+
 glm::mat4 Camera::getWorldToViewMatrix(){
 	return glm::lookAt(eyePosition, eyePosition + viewDirection, upVector);
 }

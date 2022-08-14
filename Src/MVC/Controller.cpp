@@ -49,13 +49,32 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 	switch (currentState) {
 
 	case Controller::INIT:
+		// -- Cubes
 		model->addShape(0);
+		model->translateShape(model->getShapes()[0], glm::vec3( 2.0f, 0.0f, -3.0f));
+		model->addShape(0);
+		model->translateShape(model->getShapes()[1], glm::vec3( 0.0f, 0.0f, -3.0f));
+		model->addShape(0);
+		model->translateShape(model->getShapes()[2], glm::vec3(-2.0f, 0.0f, -3.0f));
+
+		// -- Ico
 		model->addShape(1);
-		//model->addShape(2);
-		model->translateShape(model->getShapes()[0], glm::vec3(0.0f, 0.0f, -1.0f));
-		//model->rotateShape(model->getShapes()[0], glm::vec3(1.0f, 0.0f, 0.0f), 45);
-		model->translateShape(model->getShapes()[1], glm::vec3(0.0f, 0.0f, -5.0f));
-		//model->translateShape(model->getShapes()[2], glm::vec3(0.0f, -1.0f, -2.0f));
+		model->translateShape(model->getShapes()[3], glm::vec3( 2.0f, 2.0f, -3.0f));
+		model->addShape(1);
+		model->translateShape(model->getShapes()[4], glm::vec3( 0.0f, 2.0f, -3.0f));
+		model->addShape(1);
+		model->translateShape(model->getShapes()[5], glm::vec3(-2.0f, 2.0f, -3.0f));
+
+		// -- Plane
+		model->addShape(2);
+		model->translateShape(model->getShapes()[6], glm::vec3(0.0f, -1.0f, -3.0f));
+
+		// -- light sorces
+		model->addShape(3);
+		model->translateShape(model->getShapes()[7], glm::vec3(0.0f, 2.05f, -1.5f));
+		model->addShape(3);
+		model->translateShape(model->getShapes()[8], glm::vec3(0.0f, 0.05f, -9.0f));
+
 
 		currentState = READY;
 		break;
