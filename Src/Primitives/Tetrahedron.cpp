@@ -5,7 +5,6 @@ Tetrahedron::Tetrahedron(glm::vec3 _position, glm::vec3 _color, GLfloat _width) 
 	color = _color;
 	width = _width;
 
-
 	// -- Set Geometry values.
 	numberOfVertices = 4;
 	numberOfFaces = 4;
@@ -46,26 +45,26 @@ void Tetrahedron::fillVertexData(){
 	GLfloat height = glm::cos(angle) * width;
 
 	vertexData[0] =
-	{
+	{ 
 		glm::vec3(origin.x - halfWidth, origin.y, origin.z + adj),
-		glm::vec3(origin.x - halfWidth, origin.y, origin.z + adj)
+		color
 	};
 
 	vertexData[1] =
 	{
 		glm::vec3(origin.x + halfWidth, origin.y, origin.z + adj),
-		glm::vec3(origin.x + halfWidth, origin.y, origin.z + adj)
+		color
 	};
 
 	vertexData[2] = 
 	{ 
 		glm::vec3(origin.x, origin.y, origin.z - hyp),
-		glm::vec3(origin.x, origin.y, origin.z - hyp)
+		color
 	};
 	vertexData[3] = 
 	{ 
 		glm::vec3(origin.x, origin.y + height, origin.z),
-		glm::vec3(origin.x, origin.y + height, origin.z)
+		color
 	};
 
 }

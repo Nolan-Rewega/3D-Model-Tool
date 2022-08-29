@@ -22,7 +22,7 @@ struct Light{
 
 	// -- Soft Edge perameters.
 	float phi;
-	float gamma;
+	float rho;
 
 	// -- Attenuation perameters.
 	float kc;
@@ -65,9 +65,13 @@ void main(){
 		// -- Spotlight.
 		else{  light += spotLight(lights[i]);  }
 	}
-	
-	//light *= color;
+
+	light *= color;
 	FragColor = vec4(light, 1.0);
+
+	// -- Gamma correction
+	//float gamma = 2.2;
+	//FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
 }
 
 float calculateDiffuseLight(vec3 lightDirection){
@@ -114,8 +118,8 @@ vec3 pointLight(Light light){
 	float attenuation  = 1.0 / (light.kc + light.kl * distance + light.kq * (distance * distance));
 	
 	ambient  *=  attenuation;
-    diffuse  *=  attenuation;
-    specular *=  attenuation;
+	diffuse  *=  attenuation;
+	specular *=  attenuation;
 
 	// -- Phong model lighting, (ambient + diffuse + specular)
 	return ( ambient + diffuse + specular );
@@ -140,12 +144,12 @@ vec3 spotLight(Light light){
 
 	// -- Spotlight soft edges.
 	float theta      = dot(lightVec3, normalize(-light.direction));
-	float epsilon    = light.phi - light.gamma;
-	float intensity  = clamp( (theta - light.gamma) / epsilon, 0.0, 1.0 ); 
+	float epsilon    = light.phi - light.rho;
+	float intensity  = clamp( (theta - light.rho) / epsilon, 0.0, 1.0 ); 
 
 	ambient  *=  attenuation * intensity;
-    diffuse  *=  attenuation * intensity;
-    specular *=  attenuation * intensity;
+	diffuse  *=  attenuation * intensity;
+	specular *=  attenuation * intensity;
 
 	return ( ambient + diffuse + specular );
 }

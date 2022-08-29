@@ -2,7 +2,6 @@
 
 
 Cube::Cube(glm::vec3 _position, glm::vec3 _color, GLfloat _width){
-	std::cout << "CUBE!!!!!!" << "\n";
 	// -- Set Cube parameters
 	origin = _position;
 	color = _color;
@@ -48,10 +47,7 @@ void Cube::fillVertexData() {
 		for (int yIdx = 0; yIdx <= 1; yIdx++) {
 			for (int zIdx = 0; zIdx <= 1; zIdx++) {
 				int idx1D = xIdx + 2 * (yIdx + 2 * zIdx);
-				vertexData[idx1D] = {
-					glm::vec3(x[xIdx], y[yIdx], z[zIdx]),
-					glm::vec3(x[xIdx], y[yIdx], z[zIdx])
-				};
+				vertexData[idx1D] = { glm::vec3(x[xIdx], y[yIdx], z[zIdx]),color };
 			}
 		}
 	}

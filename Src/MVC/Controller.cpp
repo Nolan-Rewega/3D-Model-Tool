@@ -45,10 +45,43 @@ void Controller::handleKeyPressed(GLFWwindow* window, int key, int scancode, int
 
 
 void Controller::handleMouseClick(GLFWwindow* window, int button, int action, int mods){
-	//std::cout << "CLICKED SETUP \n";
+
 	switch (currentState) {
 
 	case Controller::INIT:
+		// -- light 
+		model->addLight(
+			Light::Point,
+			glm::vec3(0.0f, 0.0f, -9.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.05f, 0.05f, 0.05f),
+			glm::vec3(0.8f, 0.8f, 0.8f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 0.1f),
+			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		);
+		model->addLight(
+			Light::Point,
+			glm::vec3(0.0f, 2.0f, -1.5f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.05f, 0.05f, 0.05f),
+			glm::vec3(0.8f, 0.8f, 0.8f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 0.1f, 0.1f),
+			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		);
+		model->addLight(
+			Light::Spot,
+			glm::vec3(3.0f, 3.0f, 0.0f),
+			glm::vec3(0.0f, -1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 0.1f, 0.01f),
+			glm::cos(glm::vec2(glm::radians(12.5f), glm::radians(15.0f)))
+		);
+
+
 		// -- Cubes
 		model->addShape(0);
 		model->translateShape(model->getShapes()[0], glm::vec3( 2.0f, 0.0f, -3.0f));
@@ -69,13 +102,8 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 		model->addShape(2);
 		model->translateShape(model->getShapes()[6], glm::vec3(0.0f, -1.0f, -3.0f));
 
-		// -- light sorces
-		model->addShape(3);
-		model->translateShape(model->getShapes()[7], glm::vec3(0.0f, 2.05f, -1.5f));
-		model->addShape(3);
-		model->translateShape(model->getShapes()[8], glm::vec3(0.0f, 0.05f, -9.0f));
-
-
+		
+		
 		currentState = READY;
 		break;
 

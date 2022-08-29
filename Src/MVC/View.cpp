@@ -1,85 +1,81 @@
 #include "View.h"
 
-View::View(){
-	// -- read shader code from a file.
-	std::string VSSinput = readShaderCode("VSS.glsl");
-	std::string FSSinput = readShaderCode("FSS.glsl");
-	const char* VSS = VSSinput.c_str();
-	const char* FSS = FSSinput.c_str();
+View::View(GLFWObject* glfwObj) : m_WIDTH(800), m_HEIGHT(800) {
+	m_glfwObj = glfwObj;
 
+	// -- Generate Shadow Depth Map framebuffer.
+	glGenFramebuffers(1, &frameBufferDM);
+	
+	// -- Link shaders.
+	Shader* VSS = new Shader("VSS.glsl", 0);
+	Shader* FSS = new Shader("FSS.glsl", 1);
+	Shader* DMVSS = new Shader("DMVSS.glsl", 0);
+	Shader* DMFSS = new Shader("DMFSS.glsl", 1);
+	Shader* LVSS = new Shader("LVSS.glsl", 0);
+	Shader* LFSS = new Shader("LFSS.glsl", 1);
+	
+	// -- Attach shaders
+	shaderProgram = new ShaderProgram();
+	lightProgram = new ShaderProgram();
+	lightModelProgam = new ShaderProgram();
 
-	// Initialize GLFW
-	glfwInit();
+	shaderProgram->attachShader(VSS->getShaderID());
+	shaderProgram->attachShader(FSS->getShaderID());
+	lightProgram->attachShader(DMVSS->getShaderID());
+	lightProgram->attachShader(DMFSS->getShaderID());
+	lightModelProgam->attachShader(LVSS->getShaderID());
+	lightModelProgam->attachShader(LFSS->getShaderID());
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	shaderProgram->linkProgram();
+	lightProgram->linkProgram();
+	lightModelProgam->linkProgram();
 
-	window = glfwCreateWindow(800, 800, "3DOpenGL", NULL, NULL);
-	glfwMakeContextCurrent(window);
-
-	gladLoadGL();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glViewport(0, 0, 800, 800);
-
-//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-//if (glfwRawMouseMotionSupported())
-//	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	shaderProgram = glCreateProgram();
-
-	glShaderSource(vertexShader, 1, &VSS, NULL);
-	glShaderSource(fragmentShader, 1, &FSS, NULL);
-	glCompileShader(vertexShader);
-	glCompileShader(fragmentShader);
-
-	checkGLSLErrors(vertexShader, 0);
-	checkGLSLErrors(fragmentShader, 0);
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	checkGLSLErrors(shaderProgram, 1);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	// -- Setting projection matrix.
-	projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 30.0f);
+	// -- Setting camera projection matrix.
+	m_projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 30.0f);
 	//projectionMat4 = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 30.0f);
 }
 
 View::~View(){
+	delete shaderProgram;
+	delete lightProgram;
+	delete lightModelProgam;
+	glDeleteFramebuffers(1, &frameBufferDM);
 	deleteBuffers();
-	glDeleteProgram(shaderProgram);
-	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 
 
-
+// -- Draw called only when the model changes.
 void View::draw(){
+
+	// -- Generate light Depth Maps.
+	//glBindFramebuffer(GL_FRAMEBUFFER, frameBufferDM);
+	//for (Light* light : m_model->getLights()) {
+	//	m_glfwObj->setViewPort( light->getShadowMapSize(), light->getShadowMapSize() );
+	//	renderDepthMapTexture(light);
+	//}
+
+
+	// -- Draw the Shapes on screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	m_glfwObj->setViewPort(m_WIDTH, m_HEIGHT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (Shape* shape : model->getShapes()){
+	for (Shape* shape : m_model->getShapes()){
 		drawShape(shape);
-		//drawNormals(shape);
+	}
+	for (Light* light : m_model->getLights()){
+		drawLight(light);
 	}
 
-	glfwSwapBuffers(window);
+	glfwSwapBuffers(m_glfwObj->getWindow());
 }
 
 
 void View::drawShape(Shape* shape) {
-	glUseProgram(shaderProgram);
-
-	GLfloat byteStride = 9 * sizeof(GLfloat);
+	GLuint shader = shaderProgram->getProgramID();
+	glUseProgram(shader);
 
 	// -- Generate the VAO, VBO, EBO for this shape.
 	glGenVertexArrays(1, &VAO);
@@ -94,77 +90,49 @@ void View::drawShape(Shape* shape) {
 		GL_STATIC_DRAW
 	);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)(sizeof(GLfloat) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)(sizeof(GLfloat) * 6));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 	glEnableVertexAttribArray(2);
+	
+	// -- Uniform loading.
+	std::string members[] = { "type",     "position",  "direction",  "ambiant",
+		                      "diffuse",  "specular",  "kc",         "kl",  
+		                      "kq",       "phi",       "rho"                    };
+	// -- THIS ONLY WORKS UPTO 10 LIGHTS
+	for (int i = 0; i < m_model->getLights().size(); ++i) {
+		Light* light = m_model->getLights()[i];
 
+		for (std::string s : members) {
+			// -- largerst variable name is 20 characters.
+			char uniformName[20] = { 'l', 'i', 'g', 'h', 't', 's', '[', i + 48, ']', '.' };
+			memcpy(&uniformName[10], s.c_str(), s.length() + 1);
+			
+			auto location = glGetUniformLocation(shader, uniformName);
 
-	// -- Shader setup.
-	// two point lights, one spotlight and one directional light.
+			if      (s == "type"     ) { glUniform1i (location,     light->getType()                ); }
+			else if (s == "position" ) { glUniform3fv(location, 1, &light->getPosition()[0]         ); }
+			else if (s == "direction") { glUniform3fv(location, 1, &light->getDirection()[0]        ); }
+			else if (s == "ambiant"  ) { glUniform3fv(location, 1, &light->getAmbience()[0]         ); }
+			else if (s == "diffuse"  ) { glUniform3fv(location, 1, &light->getDiffusion()[0]        ); }
+			else if (s == "specular" ) { glUniform3fv(location, 1, &light->getSpecularity()[0]      ); }
+			else if (s == "kc"       ) { glUniform1f (location, light->getAttenuationConstants()[0] ); }
+			else if (s == "kl"       ) { glUniform1f (location, light->getAttenuationConstants()[1] ); }
+			else if (s == "kq"       ) { glUniform1f (location, light->getAttenuationConstants()[2] ); }
+			else if (s == "phi"      ) { glUniform1f (location, light->getSoftEdgeConstants()[0]    ); }
+			else if (s == "rho"      ) { glUniform1f (location, light->getSoftEdgeConstants()[1]    ); }
+		}
+	}
 
-
-	/*glUniform1i (glGetUniformLocation(shaderProgram, "lights[0].type"), 0);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].position"),  1, &glm::vec3(0.0f, 0.0f, 0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].direction"), 1, &glm::vec3(0.0f, -1.0f, -1.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].ambiant"),   1, &glm::vec3(0.05f, 0.05f, 0.05f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].diffuse"),   1, &glm::vec3(0.4f, 0.4f, 0.4f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].specular"),  1, &glm::vec3(0.5f, 0.5f, 0.5f)[0]);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kc"), 1.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kl"), 0.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kq"), 0.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].phi"), glm::cos(glm::radians(0.0f)));
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].rho"), glm::cos(glm::radians(0.0f)));*/
-
-
-	glUniform1i (glGetUniformLocation(shaderProgram, "lights[0].type"),1);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].position"),  1, &glm::vec3(0.0f,  0.0f,  -9.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].direction"), 1, &glm::vec3(0.0f,  0.0f,   0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].ambiant"),   1, &glm::vec3(0.05f, 0.05f,  0.05f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].diffuse"),   1, &glm::vec3(0.8f,  0.8f,   0.8f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[0].specular"),  1, &glm::vec3(1.0f,  1.0f,   1.0f)[0]);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kc"), 1.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kl"), 1.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].kq"), 0.1f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].phi"),   glm::cos(glm::radians(0.0f)));
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[0].gamma"), glm::cos(glm::radians(0.0f)));
-
-	glUniform1i (glGetUniformLocation(shaderProgram, "lights[1].type"), 1);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[1].position"),  1, &glm::vec3(0.0f,  2.0f,  -1.5f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[1].direction"), 1, &glm::vec3(0.0f,  0.0f,   0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[1].ambiant"),   1, &glm::vec3(0.05f, 0.05f,  0.05f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[1].diffuse"),   1, &glm::vec3(0.8f,  0.8f,   0.8f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[1].specular"),  1, &glm::vec3(1.0f,  1.0f,   1.0f)[0]);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[1].kc"), 1.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[1].kl"), 0.1f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[1].kq"), 0.1f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[1].phi"),   glm::cos(glm::radians(0.0f)));
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[1].gamma"), glm::cos(glm::radians(0.0f)));
-
-	glUniform1i (glGetUniformLocation(shaderProgram, "lights[2].type"), 2);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[2].position"),  1, &glm::vec3(3.0f, 3.0f, 0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[2].direction"), 1, &glm::vec3(0.0f,-1.0f, 0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[2].ambiant"),   1, &glm::vec3(0.0f, 0.0f, 0.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[2].diffuse"),   1, &glm::vec3(1.0f, 1.0f, 1.0f)[0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "lights[2].specular"),  1, &glm::vec3(1.0f, 1.0f, 1.0f)[0]);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[2].kc"), 1.0f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[2].kl"), 0.1f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[2].kq"), 0.01f);
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[2].phi"),   glm::cos(glm::radians(12.5f)));
-	glUniform1f (glGetUniformLocation(shaderProgram, "lights[2].gamma"), glm::cos(glm::radians(15.0f)));
-
-
-
-
-	glm::mat4 fullTransform = projectionMat4 * model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
+	glm::mat4 fullTransform = m_projectionMat4 * m_model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
 	glm::mat4 shapeTransform = shape->getTranslationMatrix();
 
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "fullTransMat4"), 1, GL_FALSE, &fullTransform[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "shapeTransMat4"), 1, GL_FALSE, &shapeTransform[0][0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, &model->getEyePosition()[0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "fullTransMat4"), 1, GL_FALSE, &fullTransform[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "shapeTransMat4"), 1, GL_FALSE, &shapeTransform[0][0]);
+	glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, &m_model->getEyePosition()[0]);
 
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, shape->getNumberOfBufferVertices());
@@ -174,11 +142,10 @@ void View::drawShape(Shape* shape) {
 }
 
 
-void View::drawNormals(Shape* shape){
-	glUseProgram(shaderProgram);
 
-	GLfloat byteStride = 9 * sizeof(GLfloat);
-	GLfloat* test = shape->debugConvertToLineNormals();
+void View::drawLight(Light* light) {
+	GLuint shader = lightModelProgam->getProgramID();
+	glUseProgram(shader);
 
 	// -- Generate the VAO, VBO, EBO for this shape.
 	glGenVertexArrays(1, &VAO);
@@ -188,104 +155,82 @@ void View::drawNormals(Shape* shape){
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(
 		GL_ARRAY_BUFFER,
-		shape->getShapeBufferSizeInBytes() * 2,
-		test,
+		light->getLightModel()->getShapeBufferSizeInBytes(),
+		light->getLightModel()->getShapeBuffer(),
 		GL_STATIC_DRAW
 	);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)(sizeof(GLfloat) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, byteStride, (void*)(sizeof(GLfloat) * 6));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 	glEnableVertexAttribArray(2);
 
-	// -- each row in the mat4 needs to be sent individually.
-	//for (int i = 2; i <= 5; i++) { // -- i = location (2 -> 5)
-	//	glVertexAttribPointer(i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float)*(i-2)*4));
-	//	glEnableVertexAttribArray(i);
-	//	glVertexAttribDivisor(i, 1);
-	//}
-
-	glm::mat4 fullTransform = projectionMat4 * model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
-	glm::mat4 shapeTransform = shape->getTranslationMatrix() * shape->getRotationMatrix();
-
-
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "transformMat4"), 1, GL_FALSE, &fullTransform[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "modelMat4"), 1, GL_FALSE, &shapeTransform[0][0]);
-	glUniform3fv(glGetUniformLocation(shaderProgram, "cameraPosition"), 1, &model->getEyePosition()[0]);
+	glm::mat4 fullTransform = m_projectionMat4 * m_model->getWorldtoViewMatrix();
+	glUniformMatrix4fv(glGetUniformLocation(shader, "fullTransMat4"), 1, GL_FALSE, &fullTransform[0][0]);
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_LINES, 0, shape->getNumberOfBufferVertices() * 2);
+	glDrawArrays(GL_TRIANGLES, 0, light->getLightModel()->getNumberOfBufferVertices());
 
-	free(test);
-	
 	// -- delete the VAO, VBO, EBO buffers for this shape.
 	deleteBuffers();
-
-
-
-
-
 }
 
 
 
-void View::checkGLSLErrors(GLuint objectID, GLint ERRORCODE) {
-	// -- GLSL compilation checking
-	GLint status;
-	GLint logLen = 0;
-	GLsizei realLen;
-	GLchar* buffer = (GLchar*)calloc(logLen, sizeof(GLchar));
+//void View::renderDepthMapTexture(Light* light) {
+//	GLuint lp = lightProgram->getProgramID();
+//	glUseProgram(lp);
+//
+//	// -- Set the Framebuffer's depth buffer to the light's depth map.
+//	glFramebufferTexture2D(
+//		GL_FRAMEBUFFER,
+//		GL_DEPTH_ATTACHMENT,
+//		GL_TEXTURE_2D,
+//		light->getShadowMapID(),
+//		0
+//	);
+//
+//	glDrawBuffer(GL_NONE);
+//	glReadBuffer(GL_NONE);
+//
+//	// -- Clear the newly binded depth buffer.
+//	glClear(GL_DEPTH_BUFFER_BIT);
+//
+//	// -- Load all vertices into the buffer.
+//	glGenVertexArrays(1, &VAO);
+//	glGenBuffers(1, &VBO);
+//
+//	glBindVertexArray(VAO);
+//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//	glBufferData(
+//		GL_ARRAY_BUFFER,
+//		m_model->getBatchedVertexBufferSize(),
+//		m_model->getBatchedVertexBuffer(),
+//		GL_STATIC_DRAW
+//	);
+//
+//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+//	glEnableVertexAttribArray(0);
+//
+//	glUniformMatrix4fv(glGetUniformLocation(lp, "lightSpaceTransform"), 1, GL_FALSE, &light->getLightTransform()[0][0]);
+//
+//	// -- Render the depth map.
+//	glBindVertexArray(VAO);
+//	glDrawArrays(GL_TRIANGLES, 0, m_model->getBatchedVertexBufferSize() / (3 * sizeof(GLfloat)));
+//}
 
-	// -- can also pass a vector of integers instead of status.
-	if (ERRORCODE == 0) {
-		glGetShaderiv(objectID, GL_COMPILE_STATUS, &status);
-		if (status != GL_TRUE) {
-			glGetShaderiv(objectID, GL_INFO_LOG_LENGTH, &logLen);
-			glGetShaderInfoLog(objectID, logLen, &realLen, buffer);
-			cout << buffer << std::endl;
-		}
-	}
-	else if (ERRORCODE == 1) {
-		glGetProgramiv(objectID, GL_LINK_STATUS, &status);
-		if (status != GL_TRUE) {
-			glGetProgramiv(objectID, GL_INFO_LOG_LENGTH, &logLen);
-			glGetProgramInfoLog(objectID, logLen, &realLen, buffer);
-			cout << buffer << std::endl;
-		}
-	}
-	free(buffer);
+
+
+void View::setModel(Model* model) {
+	m_model = model;
 }
 
-
-string View::readShaderCode(const char* filename) {
-	string shader, line;
-	ifstream inputFile(filename);
-	if (!inputFile.good()) {
-		cout << "FAILED TO LOAD FILE: " << filename << " IN readSHaderCode()" << endl;
-		exit(-420);
-	}
-	while (getline(inputFile, line)) {
-		shader.append(line);
-		shader.append("\n");
-	}
-	return shader;
-}
-
-void View::deleteBuffers() {
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-}
-
-
-
-void View::setModel(Model* givenModel) {
-	model = givenModel;
-}
-
+// -- setController() is only called once.
 void View::setController(Controller* givenController){
+	GLFWwindow* window = m_glfwObj->getWindow();
+
 	// -- Event Handling
 	glfwSetWindowUserPointer(window, givenController);
 
@@ -312,12 +257,12 @@ void View::setController(Controller* givenController){
 	glfwSetCursorPosCallback(window, mouseMovement);
 }
 
-GLFWwindow* View::getWindow(){
-	return window;
-}
-
 void View::modelChanged() {
 	draw();
 }
 
-
+void View::deleteBuffers() {
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+}

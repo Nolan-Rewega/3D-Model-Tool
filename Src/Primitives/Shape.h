@@ -26,8 +26,6 @@ public:
 	glm::mat4 getTranslationMatrix();
 
 
-	GLfloat* debugConvertToLineNormals();
-
 protected:
 	// -- Position      (x,y,z)
 	// -- Color         (r,g,b)

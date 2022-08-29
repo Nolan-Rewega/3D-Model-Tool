@@ -11,9 +11,7 @@
 #include "Camera.h"
 #include "ModelSubscriber.h"
 
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
+#include "Light.h"
 
 #include "Shape.h"
 #include "Cube.h"
@@ -29,36 +27,30 @@ public:
 	~Model();
 
 	// -- Shape object methods.
-	std::vector<Shape*> getShapes();
 	void addShape(int SHAPEFLAG);
 	void removeShape(Shape* shape);
 	void translateShape(Shape* shape, glm::vec3 translation);
 	void rotateShape(Shape* shape, glm::vec3 rotation, GLfloat angle);
 
-	// -- Lighting object methods.
-	//void addDirectionalLight(
-	//	glm::vec3 direction,
-	//	glm::vec3 ambience,
-	//	glm::vec3 diffusion,
-	//	glm::vec3 specular
-	//);
+	std::vector<Shape*> getShapes();
+	
+	// -- OpenGL batch shape buffer methods.
+	GLfloat* getBatchedVertexBuffer();
+	int getBatchedVertexBufferSize();
 
-	//void addPointLight(
-	//	glm::vec3 position,
-	//	glm::vec3 ambience,
-	//	glm::vec3 diffusion,
-	//	glm::vec3 specular,
-	//	glm::vec2 attenuationConstants
-	//);
+	// -- Light object methods.
+	void addLight(
+		Light::TYPE type,
+		glm::vec3 position,
+		glm::vec3 direction,
+		glm::vec3 ambience,
+		glm::vec3 diffusion,
+		glm::vec3 specularity,
+		glm::vec3 attenuation,
+		glm::vec2 softEdgeConstants
+	);
 
-	//void addSpotLight(
-	//	glm::vec3 position,
-	//	glm::vec3 direction,
-	//	glm::vec3 diffusion,
-	//	glm::vec3 specular,
-	//	glm::vec2 attenuationConstants,
-	//	glm::vec2 softnessConstants
-	//);
+	std::vector<Light*> getLights();
 
 
 	// -- Camera object methods.
@@ -76,9 +68,15 @@ public:
 
 private:
 	Camera* m_camera;
-	std::vector<ModelSubscriber*> m_subs;
 	std::vector<Shape*> m_shapes;
+	std::vector<Light*> m_lights;
+	std::vector<ModelSubscriber*> m_subs;
 
+	GLfloat* m_BVB;
+	int m_totalFaces;
+
+	// -- Scuffed.
+	void generateBVB();
 
 	// -- Pub-Sub methods.
 	void notifySubscribers();

@@ -4,11 +4,16 @@
 #include "Controller.h"
 #include "ModelSubscriber.h"
 
+#include "GLFWObject.h"
+
 
 int main() {
+	GLFWObject* obj = new GLFWObject(800, 800);
+	GLFWwindow* window = obj->getWindow();
+
 	Controller* controller = new Controller();
 	Model* model = new Model();
-	View* view = new View();
+	View* view = new View(obj);
 
 	// -- Set MVC connections.
 	view->setModel(model);
@@ -16,7 +21,6 @@ int main() {
 	controller->setModel(model);
 	model->addSubscriber(view);
 
-	GLFWwindow* window = view->getWindow();
 
 	// -- Main Event loop.
 	while (!glfwWindowShouldClose(window)) {
@@ -27,6 +31,7 @@ int main() {
 	delete view;
 	delete model;
 	delete controller;
+	delete obj;
 	return 0;
 }
 

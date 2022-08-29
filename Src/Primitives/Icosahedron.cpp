@@ -5,8 +5,6 @@ Icosahedron::Icosahedron(glm::vec3 _position, glm::vec3 _color, GLfloat _width){
 	color = _color;
 	width = _width;
 
-	std::cout << "Icosahedron!!!!!!" << "\n";
-
 	// -- Set Geometry values.
 	numberOfVertices = 12;
 	numberOfFaces = 20;

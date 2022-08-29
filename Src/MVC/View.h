@@ -3,36 +3,49 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
 #include "Model.h"
 #include "Controller.h"
 #include "ModelSubscriber.h"
 
-using namespace std;
+#include "GLFWObject.h"
+#include "Shader.h"
+#include "ShaderProgram.h"
+
 
 class View : public ModelSubscriber {
 
 public:
-	 View();
+	 View(GLFWObject* windowObj);
 	~View();
 
-	void setModel(Model* givenModel);
-	void setController(Controller* givenController);
-	GLFWwindow* getWindow();
-	void modelChanged();
+	void setModel(Model* model);
+	void setController(Controller* controller);
 
 private:
-	GLuint VAO, VBO, EBO;
-	GLuint shaderProgram;
-	GLFWwindow* window;
-	glm::mat4 projectionMat4;
+	const int m_WIDTH;
+	const int m_HEIGHT;
 
-	Model* model;
+	GLFWObject* m_glfwObj;
+
+	glm::mat4 m_projectionMat4;
+	Model* m_model;
+	
+	GLuint VAO, VBO, EBO;
+
+	ShaderProgram* shaderProgram; 
+	ShaderProgram* lightProgram;
+	ShaderProgram* lightModelProgam;
+
+	GLuint frameBufferDM;
+
 	void draw();
 	void drawShape(Shape* shape);
-	void drawNormals(Shape* shape);
+	void drawLight(Light* light);
+	
+	void renderDepthMapTexture(Light* light);
 
-	void checkGLSLErrors(GLuint objectID, GLint ERRORCODE);
-	string readShaderCode(const char* filename);
+	void modelChanged();
 	void deleteBuffers();
 };
 
