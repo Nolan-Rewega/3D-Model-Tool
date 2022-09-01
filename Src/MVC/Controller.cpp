@@ -50,35 +50,45 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 
 	case Controller::INIT:
 		// -- light 
+		//model->addLight(
+		//	Light::Point,
+		//	glm::vec3(0.0f, 0.0f, -9.0f),
+		//	glm::vec3(0.0f, 0.0f, 0.0f),
+		//	glm::vec3(0.05f, 0.05f, 0.05f),
+		//	glm::vec3(0.8f, 0.8f, 0.8f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 1.0f, 0.1f),
+		//	glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		//);
+		//model->addLight(
+		//	Light::Point,
+		//	glm::vec3(0.0f, 2.0f, -1.5f),
+		//	glm::vec3(0.0f, 0.0f, 0.0f),
+		//	glm::vec3(0.05f, 0.05f, 0.05f),
+		//	glm::vec3(0.8f, 0.8f, 0.8f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 0.1f, 0.1f),
+		//	glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		//);
+		//model->addLight(
+		//	Light::Spot,
+		//	glm::vec3(3.0f, 3.0f, 0.0f),
+		//	glm::vec3(0.0f, -1.0f, 0.0f),
+		//	glm::vec3(0.0f, 0.0f, 0.0f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 0.1f, 0.01f),
+		//	glm::cos(glm::vec2(glm::radians(12.5f), glm::radians(15.0f)))
+		//);
 		model->addLight(
-			Light::Point,
-			glm::vec3(0.0f, 0.0f, -9.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.05f, 0.05f, 0.05f),
-			glm::vec3(0.8f, 0.8f, 0.8f),
+			Light::Directional,
+			glm::vec3(0.0f, 4.0f, -6.0f),
+			glm::vec3(0.0f, -1.0f, 1.0f),
+			glm::vec3(0.1f, 0.1f, 0.1f),
+			glm::vec3(0.5f, 0.5f, 0.5f),
 			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(1.0f, 1.0f, 0.1f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
-		);
-		model->addLight(
-			Light::Point,
-			glm::vec3(0.0f, 2.0f, -1.5f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.05f, 0.05f, 0.05f),
-			glm::vec3(0.8f, 0.8f, 0.8f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(1.0f, 0.1f, 0.1f),
-			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
-		);
-		model->addLight(
-			Light::Spot,
-			glm::vec3(3.0f, 3.0f, 0.0f),
-			glm::vec3(0.0f, -1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(1.0f, 0.1f, 0.01f),
-			glm::cos(glm::vec2(glm::radians(12.5f), glm::radians(15.0f)))
 		);
 
 

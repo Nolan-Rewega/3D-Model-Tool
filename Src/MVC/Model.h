@@ -34,10 +34,6 @@ public:
 
 	std::vector<Shape*> getShapes();
 	
-	// -- OpenGL batch shape buffer methods.
-	GLfloat* getBatchedVertexBuffer();
-	int getBatchedVertexBufferSize();
-
 	// -- Light object methods.
 	void addLight(
 		Light::TYPE type,
@@ -71,12 +67,6 @@ private:
 	std::vector<Shape*> m_shapes;
 	std::vector<Light*> m_lights;
 	std::vector<ModelSubscriber*> m_subs;
-
-	GLfloat* m_BVB;
-	int m_totalFaces;
-
-	// -- Scuffed.
-	void generateBVB();
 
 	// -- Pub-Sub methods.
 	void notifySubscribers();

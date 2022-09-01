@@ -24,16 +24,14 @@ Light::Light( TYPE type,
 
 	switch (m_type) {
 		case TYPE::Directional:
-			std::cout << "DIR\n";
+			m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
 			generateDepthMap();
 			break;
 		case TYPE::Point:
-			std::cout << "POINT\n";
 			 m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
 			//generateCubeMap();
 			break;
 		case TYPE::Spot:
-			std::cout << "SPOT\n";
 			m_lightModel = new Tetrahedron(m_position, m_diffuse, 0.25f);
 			break;
 
@@ -45,7 +43,7 @@ Light::Light( TYPE type,
 	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
 	glm::mat4 lightView = glm::lookAt( m_position,
 		                               m_direction,
-		                               glm::vec3(0.0f, 1.0f, 0.0f));
+                                       glm::vec3(0.0f, 1.0f, 0.0f));
 	m_lightTransform = lightProjection * lightView;
 }
 
@@ -119,8 +117,10 @@ void Light::generateDepthMap(){
 	);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 }
 
 // -- Used for point lights.

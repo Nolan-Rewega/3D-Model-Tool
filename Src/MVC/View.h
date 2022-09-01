@@ -36,14 +36,16 @@ private:
 	ShaderProgram* shaderProgram; 
 	ShaderProgram* lightProgram;
 	ShaderProgram* lightModelProgam;
+	ShaderProgram* debug;
 
 	GLuint frameBufferDM;
 
 	void draw();
 	void drawShape(Shape* shape);
 	void drawLight(Light* light);
-	
-	void renderDepthMapTexture(Light* light);
+	void drawDepthMap();
+
+	void renderDepthMapTexture(Light* light, Shape* shape);
 
 	void modelChanged();
 	void deleteBuffers();

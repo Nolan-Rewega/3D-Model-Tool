@@ -13,11 +13,16 @@ View::View(GLFWObject* glfwObj) : m_WIDTH(800), m_HEIGHT(800) {
 	Shader* DMFSS = new Shader("DMFSS.glsl", 1);
 	Shader* LVSS = new Shader("LVSS.glsl", 0);
 	Shader* LFSS = new Shader("LFSS.glsl", 1);
+
+	// -- debug shaders
+	Shader* DMTVSS = new Shader("DMTVSS.glsl", 0);
+	Shader* DMTFSS = new Shader("DMTFSS.glsl", 1);
 	
 	// -- Attach shaders
 	shaderProgram = new ShaderProgram();
 	lightProgram = new ShaderProgram();
 	lightModelProgam = new ShaderProgram();
+	debug = new ShaderProgram();
 
 	shaderProgram->attachShader(VSS->getShaderID());
 	shaderProgram->attachShader(FSS->getShaderID());
@@ -25,10 +30,14 @@ View::View(GLFWObject* glfwObj) : m_WIDTH(800), m_HEIGHT(800) {
 	lightProgram->attachShader(DMFSS->getShaderID());
 	lightModelProgam->attachShader(LVSS->getShaderID());
 	lightModelProgam->attachShader(LFSS->getShaderID());
+	debug->attachShader(DMTVSS->getShaderID());
+	debug->attachShader(DMTFSS->getShaderID());
+
 
 	shaderProgram->linkProgram();
 	lightProgram->linkProgram();
 	lightModelProgam->linkProgram();
+	debug->linkProgram();
 
 	// -- Setting camera projection matrix.
 	m_projectionMat4 = glm::perspective(glm::radians(90.0f), 800.0f / 800.0f, 0.1f, 30.0f);
@@ -39,6 +48,7 @@ View::~View(){
 	delete shaderProgram;
 	delete lightProgram;
 	delete lightModelProgam;
+	delete debug;
 	glDeleteFramebuffers(1, &frameBufferDM);
 	deleteBuffers();
 }
@@ -49,18 +59,46 @@ View::~View(){
 void View::draw(){
 
 	// -- Generate light Depth Maps.
-	//glBindFramebuffer(GL_FRAMEBUFFER, frameBufferDM);
-	//for (Light* light : m_model->getLights()) {
-	//	m_glfwObj->setViewPort( light->getShadowMapSize(), light->getShadowMapSize() );
-	//	renderDepthMapTexture(light);
-	//}
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferDM);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (Light* light : m_model->getLights()) {
+		m_glfwObj->setViewPort(light->getShadowMapSize(), light->getShadowMapSize());
+
+		// -- Set the Framebuffer's depth buffer to the light's depth map.
+		glFramebufferTexture2D(
+			GL_FRAMEBUFFER,
+			GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D,
+			light->getShadowMapID(),
+			0
+		);
+
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		// -- Clear the newly binded depth buffer.
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		// -- Then render each shape to the depth map
+		for (Shape* shape : m_model->getShapes()) {
+			renderDepthMapTexture(light, shape);
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, light->getShadowMapID());
+	}
 
 
-	// -- Draw the Shapes on screen
+	// -- Draw the Shapes and light object models on screen
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	m_glfwObj->setViewPort(m_WIDTH, m_HEIGHT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// -- debug draw textbuffer
+	//drawDepthMap();
+
 
 	for (Shape* shape : m_model->getShapes()){
 		drawShape(shape);
@@ -70,6 +108,47 @@ void View::draw(){
 	}
 
 	glfwSwapBuffers(m_glfwObj->getWindow());
+}
+
+void View::drawDepthMap() {
+	GLuint shader = debug->getProgramID();
+	glUseProgram(shader);
+
+	GLfloat vertices[] = {
+		// --  x     y,    u    v 
+		    -1.0f,  1.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+
+			-1.0f,  1.0f, 0.0f, 1.0f,
+			 1.0f, -1.0f, 1.0f, 0.0f,
+			 1.0f,  1.0f, 1.0f, 1.0f,
+	};
+
+
+	// -- Generate the VAO, VBO, EBO for this shape.
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		sizeof(vertices),
+		&vertices,
+		GL_STATIC_DRAW
+	);
+
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	// -- delete the VAO, VBO, EBO buffers for this shape.
+	deleteBuffers();
 }
 
 
@@ -98,7 +177,7 @@ void View::drawShape(Shape* shape) {
 	glEnableVertexAttribArray(2);
 	
 	// -- Uniform loading.
-	std::string members[] = { "type",     "position",  "direction",  "ambiant",
+	std::string members[] = { "type",     "position",  "direction",  "ambient",
 		                      "diffuse",  "specular",  "kc",         "kl",  
 		                      "kq",       "phi",       "rho"                    };
 	// -- THIS ONLY WORKS UPTO 10 LIGHTS
@@ -115,7 +194,7 @@ void View::drawShape(Shape* shape) {
 			if      (s == "type"     ) { glUniform1i (location,     light->getType()                ); }
 			else if (s == "position" ) { glUniform3fv(location, 1, &light->getPosition()[0]         ); }
 			else if (s == "direction") { glUniform3fv(location, 1, &light->getDirection()[0]        ); }
-			else if (s == "ambiant"  ) { glUniform3fv(location, 1, &light->getAmbience()[0]         ); }
+			else if (s == "ambient"  ) { glUniform3fv(location, 1, &light->getAmbience()[0]         ); }
 			else if (s == "diffuse"  ) { glUniform3fv(location, 1, &light->getDiffusion()[0]        ); }
 			else if (s == "specular" ) { glUniform3fv(location, 1, &light->getSpecularity()[0]      ); }
 			else if (s == "kc"       ) { glUniform1f (location, light->getAttenuationConstants()[0] ); }
@@ -128,10 +207,11 @@ void View::drawShape(Shape* shape) {
 
 	glm::mat4 fullTransform = m_projectionMat4 * m_model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
 	glm::mat4 shapeTransform = shape->getTranslationMatrix();
-
+	glm::mat4 LST = m_model->getLights()[0]->getLightTransform();
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "fullTransMat4"), 1, GL_FALSE, &fullTransform[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "shapeTransMat4"), 1, GL_FALSE, &shapeTransform[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "LightSpaceTransform"), 1, GL_FALSE, &LST[0][0]);
 	glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, &m_model->getEyePosition()[0]);
 
 	glBindVertexArray(VAO);
@@ -179,47 +259,38 @@ void View::drawLight(Light* light) {
 
 
 
-//void View::renderDepthMapTexture(Light* light) {
-//	GLuint lp = lightProgram->getProgramID();
-//	glUseProgram(lp);
-//
-//	// -- Set the Framebuffer's depth buffer to the light's depth map.
-//	glFramebufferTexture2D(
-//		GL_FRAMEBUFFER,
-//		GL_DEPTH_ATTACHMENT,
-//		GL_TEXTURE_2D,
-//		light->getShadowMapID(),
-//		0
-//	);
-//
-//	glDrawBuffer(GL_NONE);
-//	glReadBuffer(GL_NONE);
-//
-//	// -- Clear the newly binded depth buffer.
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//
-//	// -- Load all vertices into the buffer.
-//	glGenVertexArrays(1, &VAO);
-//	glGenBuffers(1, &VBO);
-//
-//	glBindVertexArray(VAO);
-//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//	glBufferData(
-//		GL_ARRAY_BUFFER,
-//		m_model->getBatchedVertexBufferSize(),
-//		m_model->getBatchedVertexBuffer(),
-//		GL_STATIC_DRAW
-//	);
-//
-//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-//	glEnableVertexAttribArray(0);
-//
-//	glUniformMatrix4fv(glGetUniformLocation(lp, "lightSpaceTransform"), 1, GL_FALSE, &light->getLightTransform()[0][0]);
-//
-//	// -- Render the depth map.
-//	glBindVertexArray(VAO);
-//	glDrawArrays(GL_TRIANGLES, 0, m_model->getBatchedVertexBufferSize() / (3 * sizeof(GLfloat)));
-//}
+void View::renderDepthMapTexture(Light* light, Shape* shape) {
+	GLuint lp = lightProgram->getProgramID();
+	glUseProgram(lp);
+
+	// -- Load all vertices into the buffer.
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(
+		GL_ARRAY_BUFFER,
+		shape->getShapeBufferSizeInBytes(),
+		shape->getShapeBuffer(),
+		GL_STATIC_DRAW
+	);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	glEnableVertexAttribArray(2);
+
+	glm::mat4 shapeTransform = shape->getTranslationMatrix();
+	glUniformMatrix4fv(glGetUniformLocation(lp, "shapeTransform"), 1, GL_FALSE, &shapeTransform[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(lp, "lightSpaceTransform"), 1, GL_FALSE, &light->getLightTransform()[0][0]);
+
+	// -- Render to the depth map.
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, shape->getNumberOfBufferVertices());
+}
 
 
 

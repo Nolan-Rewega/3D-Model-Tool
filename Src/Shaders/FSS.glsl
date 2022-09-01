@@ -30,23 +30,31 @@ struct Light{
 	float kq;
 };
 
+
 // -- Function forward definition.
 vec3 directionalLight(Light light);
 vec3 pointLight(Light light);
 vec3 spotLight(Light light);
 
+float calculateShadow(vec4 positionLST);
 float calculateDiffuseLight(vec3 lightDirection);
 float calculateSpecularLight(vec3 reflection, int exponent);
 
-// -- Lighting Uniforms
+
+// -- Uniforms
 uniform vec3 cameraPosition;
 uniform Light lights[MAXLIGHTS];
+uniform sampler2D shadowMap;
+
 
 // -- vertex shader inputs
 in vec3 color;
 in vec3 normal;
 in vec3 position;
+in vec4 positionLST;
 
+
+// -- Fragment shader outputs.
 out vec4 FragColor;
 
 
@@ -74,6 +82,28 @@ void main(){
 	//FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
 }
 
+
+float calculateShadow(vec4 positionLST){
+	vec3 projectedPosition = positionLST.xyz / positionLST.w;
+	projectedPosition = projectedPosition * 0.5 + 0.5;
+
+	// -- fixes oversampling
+	if(projectedPosition.z > 1.0){
+		return 1.0;
+	}
+
+	// -- Lower is closer
+	float mapDepth = texture(shadowMap, projectedPosition.xy).r; 
+    float currentDepth = projectedPosition.z;
+	
+	// -- offset to remove shadow acne
+	float offset = 0.005;
+
+	// -- 1.0 means illuminated, 0.0 means occluded 
+    float shadow = currentDepth - offset < mapDepth  ? 1.0 : 0.0;
+	return shadow;
+}
+
 float calculateDiffuseLight(vec3 lightDirection){
 	return clamp( dot( lightDirection, normal ), 0, 1 );
 }
@@ -88,6 +118,9 @@ float calculateSpecularLight(vec3 lightDirection, int exponent){
 
 
 vec3 directionalLight(Light light){
+	// -- Shadows calculation.
+	float shadow    = calculateShadow(positionLST);
+
 	// -- Ambient light.
 	vec3 ambient    = light.ambient;
 
@@ -99,7 +132,7 @@ vec3 directionalLight(Light light){
 	vec3 specular   = light.specular * calculateSpecularLight(lightVec3, 33);
 	
 	// -- Phong model lighting, (ambient + diffuse + specular)
-	return ( ambient + diffuse + specular );
+	return ( ambient + (shadow * (diffuse + specular)) );
 }
 
 
