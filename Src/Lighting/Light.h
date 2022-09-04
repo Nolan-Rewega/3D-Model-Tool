@@ -1,15 +1,16 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include <iostream>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Cube.h"
-#include "Tetrahedron.h"
+#include "../Primitives/Cube.h"
+#include "../Primitives/Tetrahedron.h"
 
-#include <iostream>
 
 class Light {
 public:

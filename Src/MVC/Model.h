@@ -8,16 +8,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "Camera.h"
+#include "../Camera.h"
 #include "ModelSubscriber.h"
 
-#include "Light.h"
+#include "../Lighting/Light.h"
 
-#include "Shape.h"
-#include "Cube.h"
-#include "Icosahedron.h"
-#include "Plane.h"
-#include "Tetrahedron.h"
+#include "../Primitives/Shape.h"
+#include "../Primitives/Cube.h"
+#include "../Primitives/Icosahedron.h"
+#include "../Primitives/Plane.h"
+#include "../Primitives/Tetrahedron.h"
 
 
 class Model {

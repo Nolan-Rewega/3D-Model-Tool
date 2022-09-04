@@ -1,10 +1,10 @@
 #include <iostream>
-#include "Model.h"
-#include "View.h"
-#include "Controller.h"
-#include "ModelSubscriber.h"
+#include "./MVC/Model.h"
+#include "./MVC/View.h"
+#include "./MVC/Controller.h"
+#include "./MVC/ModelSubscriber.h"
 
-#include "GLFWObject.h"
+#include "./OpenGL/GLFWObject.h"
 
 
 int main() {

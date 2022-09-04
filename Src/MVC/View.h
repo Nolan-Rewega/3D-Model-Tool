@@ -8,9 +8,9 @@
 #include "Controller.h"
 #include "ModelSubscriber.h"
 
-#include "GLFWObject.h"
-#include "Shader.h"
-#include "ShaderProgram.h"
+#include "../OpenGL/GLFWObject.h"
+#include "../OpenGL/Shader.h"
+#include "../OpenGL/ShaderProgram.h"
 
 
 class View : public ModelSubscriber {
