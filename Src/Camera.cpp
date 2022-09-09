@@ -6,11 +6,11 @@ Camera::Camera(GLfloat sensitivity, GLfloat sphereRadius){
 	phi = glm::radians(90.0f);
 
 	// -- origin of the camera sphere
-	origin = glm::vec3(0.0, 0.0, -3.0f);
+	origin = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-	eyePosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	viewDirection = glm::vec3(0.0f, 0.0f, -1.0f);
+	eyePosition = glm::vec3(0.0f, 0.0f, -3.0f);
+	viewDirection = glm::vec3(0.0f, 0.0f, 1.0f);
 	upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	SENSE = sensitivity;

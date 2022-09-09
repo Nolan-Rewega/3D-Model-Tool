@@ -29,7 +29,7 @@ public:
 	);
 	~Light();
 
-	glm::mat4 getLightTransform();
+	std::vector<glm::mat4> getLightTransforms();
 
 	GLuint getShadowMapID();
 	int getShadowMapSize();
@@ -52,7 +52,7 @@ private:
 	TYPE m_type;
 
 	// -- Light Matricies
-	glm::mat4 m_lightTransform;
+	std::vector<glm::mat4> m_lightTransforms;
 
 	// -- Light shadow map ID
 	GLuint m_shadowMapID;

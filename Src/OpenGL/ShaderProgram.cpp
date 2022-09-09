@@ -1,11 +1,29 @@
 #include "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(){
+ShaderProgram::ShaderProgram(const char* VSS, const char* FSS, const char* GSS){
 	m_programID = glCreateProgram();
+
+	// -- Attach shaders
+	if (GSS != nullptr) {
+		m_GSS = new Shader(GSS, 2);
+		this->attachShader(m_GSS->getShaderID());
+	}
+
+    m_VSS = new Shader(VSS, 0);
+	this->attachShader(m_VSS->getShaderID());
+    m_FSS = new Shader(FSS, 1);
+	this->attachShader(m_FSS->getShaderID());
+
+	// -- link shaders
+	this->linkProgram();
 }
 
 ShaderProgram::~ShaderProgram(){
 	glDeleteProgram(m_programID);
+	// -- delete shaders;
+	delete m_VSS;
+	delete m_FSS;
+	delete m_GSS;
 }
 
 GLuint ShaderProgram::getProgramID(){

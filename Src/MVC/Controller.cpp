@@ -50,16 +50,16 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 
 	case Controller::INIT:
 		// -- light 
-		//model->addLight(
-		//	Light::Point,
-		//	glm::vec3(0.0f, 0.0f, -9.0f),
-		//	glm::vec3(0.0f, 0.0f, 0.0f),
-		//	glm::vec3(0.05f, 0.05f, 0.05f),
-		//	glm::vec3(0.8f, 0.8f, 0.8f),
-		//	glm::vec3(1.0f, 1.0f, 1.0f),
-		//	glm::vec3(1.0f, 1.0f, 0.1f),
-		//	glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
-		//);
+		model->addLight(
+			Light::Point,
+			glm::vec3(0.0f, 2.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.1f, 0.1f, 0.1f),
+			glm::vec3(0.8f, 0.8f, 0.8f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 0.01f, 0.01f),
+			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		);
 		//model->addLight(
 		//	Light::Point,
 		//	glm::vec3(0.0f, 2.0f, -1.5f),
@@ -80,25 +80,26 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 		//	glm::vec3(1.0f, 0.1f, 0.01f),
 		//	glm::cos(glm::vec2(glm::radians(12.5f), glm::radians(15.0f)))
 		//);
-		model->addLight(
-			Light::Directional,
-			glm::vec3(0.0f, 4.0f, -6.0f),
-			glm::vec3(0.0f, -1.0f, 1.0f),
-			glm::vec3(0.1f, 0.1f, 0.1f),
-			glm::vec3(0.5f, 0.5f, 0.5f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
-		);
+		//model->addLight(
+		//	Light::Directional,
+		//	glm::vec3(0.0f,  0.0f,  0.0f),
+		//	glm::vec3(1.0f, -1.0f, -1.0f),
+		//	glm::vec3(0.1f,  0.1f,  0.1f),
+		//	glm::vec3(0.5f,  0.5f,  0.5f),
+		//	glm::vec3(1.0f,  1.0f,  1.0f),
+		//	glm::vec3(0.0f,  0.0f,  0.0f),
+		//	glm::cos(glm::vec2(glm::radians(0.0f), glm::radians(0.0f)))
+		//);
 
 
 		// -- Cubes
 		model->addShape(0);
-		model->translateShape(model->getShapes()[0], glm::vec3( 2.0f, 0.0f, -3.0f));
+		model->translateShape(model->getShapes()[0], glm::vec3( 0.0f, 0.0f, -2.0f));
 		model->addShape(0);
-		model->translateShape(model->getShapes()[1], glm::vec3( 0.0f, 0.0f, -3.0f));
+		model->translateShape(model->getShapes()[1], glm::vec3( 0.0f, 0.0f,  2.0f));
 		model->addShape(0);
-		model->translateShape(model->getShapes()[2], glm::vec3(-2.0f, 0.0f, -3.0f));
+		model->translateShape(model->getShapes()[2], glm::vec3(2.0f, 0.0f, 0.0f));
+		model->rotateShape(model->getShapes()[2], glm::vec3(1.0f, 0.0f, 0.0f), 45.0f);
 
 		// -- Ico
 		model->addShape(1);
@@ -110,8 +111,15 @@ void Controller::handleMouseClick(GLFWwindow* window, int button, int action, in
 
 		// -- Plane
 		model->addShape(2);
-		model->translateShape(model->getShapes()[6], glm::vec3(0.0f, -1.0f, -3.0f));
+		model->translateShape(model->getShapes()[6], glm::vec3(0.0f, -1.0f, 0.0f));
 
+		model->addShape(2);
+		model->translateShape(model->getShapes()[7], glm::vec3(0.0f, 9.0f, -10.0f));
+		model->rotateShape(model->getShapes()[7], glm::vec3(1.0f,0.0f,0.0f), 90.0f);
+
+		model->addShape(2);
+		model->translateShape(model->getShapes()[8], glm::vec3(10.0f, 9.0f, 0.0f));
+		model->rotateShape(model->getShapes()[8], glm::vec3(0.0f, 0.0f, 1.0f), 90.0f);
 		
 		
 		currentState = READY;

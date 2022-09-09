@@ -1,5 +1,6 @@
 #include "Light.h"
 
+// -- This must be seperated into multiple classes.
 Light::Light( TYPE type,
 	          glm::vec3 position,
 	          glm::vec3 direction,
@@ -12,25 +13,46 @@ Light::Light( TYPE type,
 	m_type = type;
 	m_shadowMapSize = 1024;
 
-	m_position = position;
+	m_position  = position;
 	m_direction = direction;
 
-	m_ambient = ambience;
-	m_diffuse = diffusion;
+	m_ambient  = ambience;
+	m_diffuse  = diffusion;
 	m_specular = specularity;
 
 	m_attenuation = attenuation;
-	m_softedge = softEdgeConstants;
+	m_softedge    = softEdgeConstants;
 
+
+	glm::mat4 lightProjection = glm::mat4(1.0f);
+	glm::mat4 lightView = glm::mat4(1.0f);
+		
 	switch (m_type) {
 		case TYPE::Directional:
-			m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
+
+			glm::vec3 pos = (glm::vec3(0.0f) - m_direction ) * glm::vec3(5.0f);
+			m_lightModel = new Cube(pos, m_diffuse, 0.25f);
+			lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f);
+			lightView = glm::lookAt(pos, m_direction, glm::vec3(0.0f, 1.0f, 0.0f));
+			m_lightTransforms.push_back(lightProjection * lightView);
+
 			generateDepthMap();
 			break;
+
 		case TYPE::Point:
-			 m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
-			//generateCubeMap();
+			m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
+			lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, 1.0f, 10.0f);
+
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)));
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)));
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+			m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)));
+
+			generateCubeMap();
 			break;
+
 		case TYPE::Spot:
 			m_lightModel = new Tetrahedron(m_position, m_diffuse, 0.25f);
 			break;
@@ -40,19 +62,15 @@ Light::Light( TYPE type,
 	}
 
 	// -- Orthogonal projections
-	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 10.0f);
-	glm::mat4 lightView = glm::lookAt( m_position,
-		                               m_direction,
-                                       glm::vec3(0.0f, 1.0f, 0.0f));
-	m_lightTransform = lightProjection * lightView;
+	
 }
 
 Light::~Light(){
 	free(m_lightModel);
 }
 
-glm::mat4 Light::getLightTransform(){
-	return m_lightTransform;
+std::vector<glm::mat4> Light::getLightTransforms(){
+	return m_lightTransforms;
 }
 
 GLuint Light::getShadowMapID(){
@@ -125,7 +143,27 @@ void Light::generateDepthMap(){
 
 // -- Used for point lights.
 void Light::generateCubeMap(){
-
+	glGenTextures(1, &m_shadowMapID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMapID);
+	// -- Call glTexImage2D to gen each of the six sides of a cubemap
+	for (int i = 0; i < 6; ++i) {
+		glTexImage2D(
+			GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+			0,
+			GL_DEPTH_COMPONENT,
+			m_shadowMapSize,
+			m_shadowMapSize,
+			0,
+			GL_DEPTH_COMPONENT,
+			GL_FLOAT,
+			NULL
+		);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
 
 }
 

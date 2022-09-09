@@ -9,7 +9,6 @@
 #include "ModelSubscriber.h"
 
 #include "../OpenGL/GLFWObject.h"
-#include "../OpenGL/Shader.h"
 #include "../OpenGL/ShaderProgram.h"
 
 
@@ -34,8 +33,9 @@ private:
 	GLuint VAO, VBO, EBO;
 
 	ShaderProgram* shaderProgram; 
-	ShaderProgram* lightProgram;
-	ShaderProgram* lightModelProgam;
+	ShaderProgram* directionalShadows;
+	ShaderProgram* lightModelProgram;
+	ShaderProgram* omniDirShadows;
 	ShaderProgram* debug;
 
 	GLuint frameBufferDM;
@@ -46,6 +46,7 @@ private:
 	void drawDepthMap();
 
 	void renderDepthMapTexture(Light* light, Shape* shape);
+	void renderOmniDepthMap(Light* light, Shape* shape);
 
 	void modelChanged();
 	void deleteBuffers();

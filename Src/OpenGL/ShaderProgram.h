@@ -8,10 +8,11 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "Shader.h"
 
 class ShaderProgram {
 public:
-	ShaderProgram();
+	ShaderProgram(const char* VSS, const char* GSS, const char* FSS = nullptr);
 	~ShaderProgram();
 	
 	GLuint getProgramID();
@@ -21,6 +22,9 @@ public:
 
 private:
 	GLuint m_programID;
+	Shader* m_VSS;
+	Shader* m_GSS;
+	Shader* m_FSS;
 
 	void checkGLSLErrors(GLuint objectID);
 
