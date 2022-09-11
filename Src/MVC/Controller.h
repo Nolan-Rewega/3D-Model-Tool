@@ -23,6 +23,7 @@ public:
 private:
 	enum STATE { INIT, READY, DRAGGING, HALT };
 	STATE currentState;
+	double counter = 0;
 
 	double PrevX, PrevY;
 

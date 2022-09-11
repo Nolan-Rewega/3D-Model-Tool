@@ -33,9 +33,7 @@ private:
 	GLuint VAO, VBO, EBO;
 
 	ShaderProgram* shaderProgram; 
-	ShaderProgram* directionalShadows;
 	ShaderProgram* lightModelProgram;
-	ShaderProgram* omniDirShadows;
 	ShaderProgram* debug;
 
 	GLuint frameBufferDM;
@@ -44,9 +42,6 @@ private:
 	void drawShape(Shape* shape);
 	void drawLight(Light* light);
 	void drawDepthMap();
-
-	void renderDepthMapTexture(Light* light, Shape* shape);
-	void renderOmniDepthMap(Light* light, Shape* shape);
 
 	void modelChanged();
 	void deleteBuffers();

@@ -10,24 +10,10 @@
 
 #include "../Primitives/Cube.h"
 #include "../Primitives/Tetrahedron.h"
-
+#include "../OpenGL/ShaderProgram.h"
 
 class Light {
 public:
-	enum TYPE { Directional, Point, Spot};
-
-	// -- public constructor.
-	Light(
-		TYPE type,
-		glm::vec3 position,
-		glm::vec3 direction,
-		glm::vec3 ambience,
-		glm::vec3 diffusion,
-		glm::vec3 specularity,
-		glm::vec3 attenuation,
-		glm::vec2 softEdgeConstants
-	);
-	~Light();
 
 	std::vector<glm::mat4> getLightTransforms();
 
@@ -47,19 +33,27 @@ public:
 	glm::vec3 getAttenuationConstants();
 	glm::vec2 getSoftEdgeConstants();
 
-private:
-	// -- Light Type.
-	TYPE m_type;
+	void setPosition(glm::vec3 delta);
+
+	virtual void configureDepthAttachment() = 0;
+	virtual void renderDepthmap(Shape* shape, GLuint VBO, GLuint VAO) = 0;
+
+protected:
+	// -- Shadow program.
+	ShaderProgram* m_shadowProgram;
 
 	// -- Light Matricies
 	std::vector<glm::mat4> m_lightTransforms;
+	
+	// -- Type of light.
+	int m_type;
+
+	// -- Light model
+	Shape* m_lightModel;
 
 	// -- Light shadow map ID
 	GLuint m_shadowMapID;
 	GLuint m_shadowMapSize;
-
-	// -- Light model
-	Shape* m_lightModel;
 
 	// -- Light vector values.
 	glm::vec3 m_position;
@@ -74,9 +68,8 @@ private:
 	glm::vec3 m_attenuation;
 	glm::vec2 m_softedge;
 
-	// -- Shadow map generation methods.
-	void generateDepthMap();
-	void generateCubeMap();
+
+	virtual void setLightSpaceTransforms() = 0;
 
 };
 

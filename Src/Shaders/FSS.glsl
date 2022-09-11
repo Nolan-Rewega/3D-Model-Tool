@@ -180,6 +180,7 @@ vec3 pointLight(Light light){
 
 	// -- Phong model lighting, (ambient + diffuse + specular)
 	return ( ambient + (shadow * (diffuse + specular)) ); 
+	//return vec3(shadow / farPlane);
 }
 
 

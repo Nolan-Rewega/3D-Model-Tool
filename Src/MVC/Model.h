@@ -11,7 +11,8 @@
 #include "../Camera.h"
 #include "ModelSubscriber.h"
 
-#include "../Lighting/Light.h"
+#include "../Lighting/PointLight.h"
+#include "../Lighting/DirectionalLight.h"
 
 #include "../Primitives/Shape.h"
 #include "../Primitives/Cube.h"
@@ -35,15 +36,20 @@ public:
 	std::vector<Shape*> getShapes();
 	
 	// -- Light object methods.
-	void addLight(
-		Light::TYPE type,
+	void addPointLight(
 		glm::vec3 position,
-		glm::vec3 direction,
 		glm::vec3 ambience,
 		glm::vec3 diffusion,
 		glm::vec3 specularity,
 		glm::vec3 attenuation,
 		glm::vec2 softEdgeConstants
+	);
+
+	void addDirectionalLight(
+		glm::vec3 direction,
+		glm::vec3 ambience,
+		glm::vec3 diffusion,
+		glm::vec3 specularity
 	);
 
 	std::vector<Light*> getLights();
@@ -53,6 +59,7 @@ public:
 	void zoomCamera(GLfloat dZoom);
 	void rotateCamera(GLfloat dTheta, GLfloat dPhi);
 	void translateCamera(glm::vec3 delta);
+	void translateLight(glm::vec3 dt);
 
 	glm::vec3 getEyePosition();
 	glm::vec3 getViewDirection();

@@ -56,29 +56,33 @@ void Model::rotateShape(Shape* shape, glm::vec3 rotation, GLfloat angle) {
 	notifySubscribers();
 }
 
-
-
-
-void Model::addLight( Light::TYPE type,
-                      glm::vec3 position,
-                      glm::vec3 direction,
-                      glm::vec3 ambience,
-                      glm::vec3 diffusion,
-                      glm::vec3 specularity,
-                      glm::vec3 attenuation,
-                      glm::vec2 softEdgeConstants )
-{
-	m_lights.push_back( new Light( type, 
-                                   position, 
-                                   direction, 
-                                   ambience, 
-                                   diffusion, 
-                                   specularity, 
-                                   attenuation, 
-                                   softEdgeConstants )
-	);
+void Model::translateLight(glm::vec3 dt) {
+	m_lights[0]->setPosition(dt);
 	notifySubscribers();
 }
+
+
+
+void Model::addPointLight( glm::vec3 position,
+                           glm::vec3 ambience,
+                           glm::vec3 diffusion,
+                           glm::vec3 specularity,
+                           glm::vec3 attenuation,
+                           glm::vec2 softEdgeConstants ){
+	m_lights.push_back(new PointLight(position, ambience, diffusion, specularity, attenuation, softEdgeConstants));
+	notifySubscribers();
+}
+
+void Model::addDirectionalLight( glm::vec3 direction,
+	                             glm::vec3 ambience,
+	                             glm::vec3 diffusion,
+	                             glm::vec3 specularity ){
+	m_lights.push_back(new DirectionalLight(direction, ambience, diffusion, specularity));
+	notifySubscribers();
+}
+
+//void Model::addSpotLight() {};
+
 
 std::vector<Light*> Model::getLights() {
 	return m_lights;
