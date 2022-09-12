@@ -6,6 +6,7 @@
 struct Light{
 	// -- 0 = directed, 1 = point, 2 = spotlight;
 	int type;
+	float farPlane;
 
 	// -- Lighting properties.
 	vec3 position;
@@ -28,12 +29,12 @@ struct Light{
 
 
 // -- Function forward definition.
-vec3 directionalLight(Light light);
-vec3 pointLight(Light light);
+vec3 directionalLight(Light light, int i);
+vec3 pointLight(Light light, int i);
 vec3 spotLight(Light light);
 
-float calculateShadowDepthMap(vec4 positionLST);
-float calculateShadowCubeMap(Light light, vec4 pos);
+float calculateShadowDepthMap(int i);
+float calculateShadowCubeMap(Light light, vec4 pos, int i);
 
 float calculateDiffuseLight(vec3 lightDirection);
 float calculateSpecularLight(vec3 reflection, int exponent);
@@ -42,17 +43,16 @@ float calculateSpecularLight(vec3 reflection, int exponent);
 // -- Uniforms
 uniform   vec3  cameraPosition;
 uniform  Light  lights[MAXLIGHTS];
-uniform  float  farPlane;
 
-uniform  sampler2D    depthMap;
-uniform  samplerCube  cubeMap;
+uniform  sampler2D    depthMaps[MAXLIGHTS];
+uniform  samplerCube  cubeMaps [MAXLIGHTS];
 
 
 // -- vertex shader inputs
 in vec3 m_color;
 in vec3 m_normal;
 in vec3 m_position;
-in vec4 m_positionLST;
+in vec4 m_positionLST[MAXLIGHTS];
 
 
 // -- Fragment shader outputs.
@@ -66,10 +66,10 @@ void main(){
 	// -- Add Point light values to the scene
 	for(int i = 0; i < MAXLIGHTS; i++){
 		// -- Directional lights.
-		if( lights[i].type == 0 ){  light += directionalLight(lights[i]);  }
+		if( lights[i].type == 0 ){  light += directionalLight(lights[i], i);  }
 		
 		// -- Point lights
-		else if( lights[i].type == 1 ){  light += pointLight(lights[i]);  }
+		else if( lights[i].type == 1 ){  light += pointLight(lights[i], i);  }
 		
 		// -- Spotlight.
 		else{  light += spotLight(lights[i]);  }
@@ -87,7 +87,9 @@ void main(){
 
 
 
-float calculateShadowDepthMap(vec4 positionLST){
+float calculateShadowDepthMap(int i){
+	vec4 positionLST = m_positionLST[i];
+
 	vec3 projectedPosition = positionLST.xyz / positionLST.w;
 	projectedPosition = projectedPosition * 0.5 + 0.5;
 
@@ -95,7 +97,7 @@ float calculateShadowDepthMap(vec4 positionLST){
 	if(projectedPosition.z > 1.0){ return 1.0; }
 
 	// -- Depth values.
-	float mapDepth     = texture(depthMap, projectedPosition.xy).r; 
+	float mapDepth     = texture(depthMaps[i], projectedPosition.xy).r; 
     float currentDepth = projectedPosition.z;
 	
 	// -- offset to remove shadow acne
@@ -107,11 +109,11 @@ float calculateShadowDepthMap(vec4 positionLST){
 }
 
 
-float calculateShadowCubeMap(Light light, vec3 position){
+float calculateShadowCubeMap(Light light, vec3 position, int i){
 	vec3 direction = position - light.position; 
 	
 	// -- Depth values.
-    float mapDepth     = (texture(cubeMap, direction).r) * farPlane;
+    float mapDepth     = (texture(cubeMaps[i], direction).r) * light.farPlane;
 	float currentDepth = length(direction);
 
 	// -- offset to remove shadow acne
@@ -139,9 +141,9 @@ float calculateSpecularLight(vec3 lightDirection, int exponent){
 
 
 
-vec3 directionalLight(Light light){
+vec3 directionalLight(Light light, int i){
 	// -- Shadows calculation.
-	float shadow    = calculateShadowDepthMap(m_positionLST);
+	float shadow    = calculateShadowDepthMap(i);
 
 	// -- Ambient light.
 	vec3 ambient    = light.ambient;
@@ -158,8 +160,8 @@ vec3 directionalLight(Light light){
 }
 
 
-vec3 pointLight(Light light){
-	float shadow = calculateShadowCubeMap(light, m_position); 
+vec3 pointLight(Light light, int i){
+	float shadow = calculateShadowCubeMap(light, m_position, i); 
 
 	// -- Ambient light.
 	vec3 ambient    = light.ambient;

@@ -33,8 +33,8 @@ void View::draw(){
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBufferDM);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (Light* light : m_model->getLights()) {
-		std::cout << light->getShadowMapID() << "\n";
+	for (int i = 0; i < m_model->getLights().size(); ++i) {
+		Light* light = m_model->getLights()[i];
 		m_glfwObj->setViewPort(light->getShadowMapSize(), light->getShadowMapSize());
 
 		// -- Set the Framebuffer's depth buffer to the light's depth map.
@@ -47,7 +47,8 @@ void View::draw(){
 		}
 
 		// --  Activate light's Depth map texture for shadow rendering.
-		glActiveTexture(GL_TEXTURE0 + light->getShadowMapID());
+		//     TEXTURE0 is reserved to be empty.
+		glActiveTexture(GL_TEXTURE0 + (i+1));
 		GLuint texType = (light->getType() == 0) ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP;
 		glBindTexture(texType, light->getShadowMapID());
 	}
@@ -61,7 +62,6 @@ void View::draw(){
 
 	// -- debug draw textbuffer
 	//drawDepthMap();
-
 
 	for (Shape* shape : m_model->getShapes()){
 		drawShape(shape);
@@ -145,19 +145,31 @@ void View::drawShape(Shape* shape) {
 	// -- Uniform loading.
 	std::string members[] = { "type",     "position",  "direction",  "ambient",
 		                      "diffuse",  "specular",  "kc",         "kl",  
-		                      "kq",       "phi",       "rho"                    };
-	// -- THIS ONLY WORKS UPTO 10 LIGHTS
+		                      "kq",       "phi",       "rho",        "farPlane" };
+
+	// -- Load lights
 	for (int i = 0; i < m_model->getLights().size(); ++i) {
 		Light* light = m_model->getLights()[i];
 
+		// -- Set Light's texture sampler.
+		std::string sampler = (light->getType() == 0) ? "depthMaps[" : "cubeMaps[";
+		sampler = sampler + std::to_string(i) + "]";
+		glUniform1i(glGetUniformLocation(shader, sampler.c_str()), i+1);
+		
+
+		// -- Set Light's LST. (Directional only.)
+		glm::mat4 LST = light->getLightTransforms()[0];
+		std::string uniformLST = "LST[" + std::to_string(i) + "]";
+		glUniformMatrix4fv(glGetUniformLocation(shader, uniformLST.c_str()), 1, GL_FALSE, &LST[0][0]);
+
+
+		// -- Set Light's properties.
 		for (std::string s : members) {
-			// -- largerst variable name is 20 characters.
-			char uniformName[20] = { 'l', 'i', 'g', 'h', 't', 's', '[', i + 48, ']', '.' };
-			memcpy(&uniformName[10], s.c_str(), s.length() + 1);
-			
-			auto location = glGetUniformLocation(shader, uniformName);
+			std::string uniformName = "lights[" + std::to_string(i) + "]." + s;
+			auto location = glGetUniformLocation(shader, uniformName.c_str());
 
 			if      (s == "type"     ) { glUniform1i (location,     light->getType()                ); }
+			else if (s == "farPlane" ) { glUniform1f (location,     light->getFarPlane()            ); }
 			else if (s == "position" ) { glUniform3fv(location, 1, &light->getPosition()[0]         ); }
 			else if (s == "direction") { glUniform3fv(location, 1, &light->getDirection()[0]        ); }
 			else if (s == "ambient"  ) { glUniform3fv(location, 1, &light->getAmbience()[0]         ); }
@@ -171,14 +183,12 @@ void View::drawShape(Shape* shape) {
 		}
 	}
 
+	// -- Set Shape Uniforms 
 	glm::mat4 fullTransform = m_projectionMat4 * m_model->getWorldtoViewMatrix() * shape->getTranslationMatrix() * shape->getRotationMatrix();
 	glm::mat4 shapeTransform = shape->getTranslationMatrix() * shape->getRotationMatrix();
-	glm::mat4 LST = m_model->getLights()[0]->getLightTransforms()[0];
 
-	glUniform1f(glGetUniformLocation(shader, "farPlane"), 25.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "fullTransMat4"), 1, GL_FALSE, &fullTransform[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "shapeTransMat4"), 1, GL_FALSE, &shapeTransform[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "LightSpaceTransform"), 1, GL_FALSE, &LST[0][0]);
 	glUniform3fv(glGetUniformLocation(shader, "cameraPosition"), 1, &m_model->getEyePosition()[0]);
 
 	glBindVertexArray(VAO);

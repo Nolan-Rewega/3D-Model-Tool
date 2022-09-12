@@ -12,6 +12,7 @@ PointLight::PointLight( glm::vec3 position,
 
 	// -- Set light parameters.
 	m_type = 1;
+	m_farPlane = 25.0f;
 
 	m_position = position;
 	m_direction = glm::vec3(0.0f);
@@ -114,7 +115,7 @@ void PointLight::setLightSpaceTransforms(){
 
 	// -- Set Light model and LST's
 	m_lightModel = new Cube(m_position, m_diffuse, 0.25f);
-	glm::mat4 lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, 1.0f, 10.0f);
+	glm::mat4 lightProjection = glm::perspective(glm::radians(90.0f), 1.0f, 1.0f, m_farPlane);
 
 	m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	m_lightTransforms.push_back(lightProjection * glm::lookAt(m_position, m_position + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));

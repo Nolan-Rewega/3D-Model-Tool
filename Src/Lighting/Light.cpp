@@ -22,6 +22,10 @@ Shape* Light::getLightModel(){
 	return m_lightModel;
 }
 
+float Light::getFarPlane(){
+	return m_farPlane;
+}
+
 glm::vec3 Light::getPosition(){
 	return m_position;
 }

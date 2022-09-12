@@ -23,6 +23,8 @@ public:
 	int getType();
 	Shape* getLightModel();
 
+	float getFarPlane();
+
 	glm::vec3 getPosition();
 	glm::vec3 getDirection();
 
@@ -48,6 +50,8 @@ protected:
 	// -- Type of light.
 	int m_type;
 
+	float m_farPlane;
+	
 	// -- Light model
 	Shape* m_lightModel;
 

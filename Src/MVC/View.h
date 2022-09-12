@@ -30,7 +30,7 @@ private:
 	glm::mat4 m_projectionMat4;
 	Model* m_model;
 	
-	GLuint VAO, VBO, EBO;
+	GLuint VAO, VBO;
 
 	ShaderProgram* shaderProgram; 
 	ShaderProgram* lightModelProgram;

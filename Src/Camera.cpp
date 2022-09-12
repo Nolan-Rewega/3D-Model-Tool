@@ -9,7 +9,7 @@ Camera::Camera(GLfloat sensitivity, GLfloat sphereRadius){
 	origin = glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-	eyePosition = glm::vec3(0.0f, 0.0f, -3.0f);
+	eyePosition = glm::vec3(2.0f, 0.0f, -3.0f);
 	viewDirection = glm::vec3(0.0f, 0.0f, 1.0f);
 	upVector = glm::vec3(0.0f, 1.0f, 0.0f);
 

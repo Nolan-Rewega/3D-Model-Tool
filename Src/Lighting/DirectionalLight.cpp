@@ -10,6 +10,7 @@ DirectionalLight::DirectionalLight( glm::vec3 direction,
 
 	// -- Set light parameters
 	m_type = 0;
+	m_farPlane = 25.0f;
 
 	m_position = glm::vec3(0.0f);
 	m_direction = direction;
@@ -102,7 +103,7 @@ void DirectionalLight::setLightSpaceTransforms(){
 	glm::vec3 pos = (m_position - m_direction) * glm::vec3(5.0f);
 	m_lightModel = new Cube(pos, m_diffuse, 0.25f);
 
-	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 25.0f);
+	glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, m_farPlane);
 	glm::mat4 lightView = glm::lookAt(pos, m_direction, glm::vec3(0.0f, 1.0f, 0.0f));
 	m_lightTransforms.push_back(lightProjection * lightView);
 }
